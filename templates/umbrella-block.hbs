@@ -1,0 +1,22 @@
+<div>
+    <span class="p-key">Status: </span>
+    <span class="p-value {{statusClass}}">{{details.statusHuman}}</span>
+</div>
+
+{{#if (gt details.security_categories.length 0)}}
+    <div class="p-title">
+        {{fa-icon "shield-alt" fixedWidth=true}} Security Categories
+    </div>
+    {{#each details.security_categories as | security |}}
+        <span class="tag security-tag">{{security}}</span>
+    {{/each}}
+{{/if}}
+
+{{#if (gt details.content_categories.length 0)}}
+    <div class="p-title">
+        {{fa-icon "browser" fixedWidth=true}} Content Categories
+    </div>
+    {{#each details.content_categories as | content |}}
+        <span class="tag content-tag">{{content}}</span>
+    {{/each}}
+{{/if}}
