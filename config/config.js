@@ -24,6 +24,7 @@ module.exports = {
    */
   description: 'Provides domain status and categorization',
   entityTypes: ['domain'],
+  defaultColor: 'light-pink',
   /**
    * An array of style files (css or less) that will be included for your integration. Any styles specified in
    * the below files can be used in your custom template.
@@ -63,7 +64,9 @@ module.exports = {
     ca: '',
     // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
     // the url parameter (by embedding the auth info in the uri)
-    proxy: ''
+    proxy: '',
+    
+    rejectUnauthorized: true
   },
   logging: {
     level: 'info' //trace, debug, info, warn, error, fatal
@@ -77,7 +80,7 @@ module.exports = {
    */
   options: [
     {
-      key: 'url',
+      key: 'investigateUrl',
       name: 'Cisco Umbrella Investigate API URL',
       description: 'The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://)',
       default: 'https://investigate.api.umbrella.com',
@@ -98,11 +101,13 @@ module.exports = {
       key: 'statuses',
       name: 'Return Statuses',
       description:
-        'Select one of more statuses that will be returned.  The default is to only return domains that have a status of "malicious".',
-      default: [{
-        value: '-1',
-        display: 'Malicious'
-      }],
+        'Select one of more statuses that will be returned when searching.  The default is to only return domains that have a status of "malicious".',
+      default: [
+        {
+          value: '-1',
+          display: 'Malicious'
+        }
+      ],
       type: 'select',
       options: [
         {
@@ -119,6 +124,52 @@ module.exports = {
         }
       ],
       multiple: true,
+      userCanEdit: true,
+      adminOnly: false
+    },
+
+    {
+      key: 'allowBlocklistSubmission',
+      name: 'Allow Blocklist Submission',
+      description: 'Allows you to submit a domain to be blocklisted on Cisco Umbrella.',
+      default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'enforcementUrl',
+      name: 'Cisco Umbrella Enforcement API URL',
+      description: 'The URL of the Cisco Umbrella Enforcement API including the schema (i.e., https://).',
+      default: 'https://s-platform.api.opendns.com',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'customerKey',
+      name: 'Customer Key',
+      description: 'Your Customer Key which can be found/generated in the Dashboard under Policies/Integrations.',
+      default: '',
+      type: 'password',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'eventTypes',
+      name: 'Event Types',
+      description: 'A Comma-Separated List of Event Types for when submitting domains to your Blocklist.',
+      default: 'Unknown',
+      type: 'text',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'eventSeverities',
+      name: 'Event Severities',
+      description: 'A Comma-Separated List of Event Severities for when submitting domains to your Blocklist.',
+      default: 'Unknown, Severe, Bad, High, Medium, Low',
+      type: 'text',
       userCanEdit: true,
       adminOnly: false
     }
