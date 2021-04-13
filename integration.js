@@ -4,9 +4,13 @@ const request = require('request');
 const config = require('./config/config');
 const async = require('async');
 const fs = require('fs');
+const fp = require('lodash/fp');
+const addDomainToBlocklist = require('./src/addDomainToBlocklist');
+const validateOptions = require('./src/validateOptions');
 
 let Logger;
 let requestWithDefaults;
+let asyncRequestWithDefault;
 
 function startup(logger) {
   Logger = logger;
@@ -33,27 +37,35 @@ function startup(logger) {
   }
 
   requestWithDefaults = request.defaults(defaults);
+
+  asyncRequestWithDefault = (requestOptions) =>
+    new Promise((resolve, reject) => {
+      requestWithDefaults(requestOptions, (err, res, body) => {
+        if (err) return reject(err);
+        resolve({ ...res, body });
+      });
+    });
 }
+
+const splitCommaOption = fp.flow(fp.split(','), fp.map(fp.trim));
 
 function doLookup(entities, options, cb) {
   let lookupResults = [];
+  
+  options.investigateUrl = options.investigateUrl.endsWith('/') ? options.investigateUrl.slice(0, -1) : options.investigateUrl;
+  options.enforcementUrl = options.enforcementUrl.endsWith('/') ? options.enforcementUrl.slice(0, -1) : options.enforcementUrl;
+
+  const eventTypes = splitCommaOption(options.eventTypes);
+  const eventSeverities = splitCommaOption(options.eventSeverities);
 
   Logger.trace({ entities }, 'doLookup');
 
-  let entityLookup = new Map();
-  let queryGroups = [[]];
-  let groupIndex = 0;
-  let entityCount = 0;
+  const entityLookup = fp.flow(
+    fp.map((entity) => [fp.flow(fp.get('value'), fp.toLower)(entity), entity]),
+    fp.fromPairs
+  )(entities);
 
-  entities.forEach((entity) => {
-    entityLookup.set(entity.value.toLowerCase(), entity);
-    queryGroups[groupIndex].push(entity.value);
-    entityCount++;
-    if (entityCount > 50) {
-      groupIndex++;
-      queryGroups.push([]);
-    }
-  });
+  const queryGroups = fp.flow(fp.map(fp.flow(fp.get('value'), fp.toLower)), fp.chunk(50))(entities);
 
   let validStatuses = new Set();
   options.statuses.forEach((status) => {
@@ -66,7 +78,7 @@ function doLookup(entities, options, cb) {
       let requestOptions = {
         method: 'POST',
         // Umbrella REST API is case sensitive even though case should not matter for domains
-        uri: `${options.url}/domains/categorization?showlabels`,
+        uri: `${options.investigateUrl}/domains/categorization?showlabels`,
         headers: {
           Authorization: `Bearer ${options.apiKey}`
         },
@@ -103,10 +115,10 @@ function doLookup(entities, options, cb) {
           if (validStatuses.has(result.status)) {
             result.statusHuman = _convertStatusToHumanReadable(result.status);
             lookupResults.push({
-              entity: entityLookup.get(entityValue),
+              entity: entityLookup[entityValue],
               data: {
                 summary: _getTags(result),
-                details: result
+                details: { ...result, eventTypes, eventSeverities }
               }
             });
           }
@@ -146,22 +158,14 @@ function _convertStatusToHumanReadable(status) {
   }
 }
 
-function validateOptions(userOptions, cb) {
-  let errors = [];
-  if (
-    typeof userOptions.apiKey.value !== 'string' ||
-    (typeof userOptions.apiKey.value === 'string' && userOptions.apiKey.value.length === 0)
-  ) {
-    errors.push({
-      key: 'apiKey',
-      message: 'You must provide a valid API key'
-    });
-  }
-  cb(null, errors);
-}
+const getOnMessage = { addDomainToBlocklist };
+
+const onMessage = ({ action, data: actionParams }, options, callback) =>
+  getOnMessage[action](actionParams, options, asyncRequestWithDefault, callback, Logger);
 
 module.exports = {
-  doLookup: doLookup,
-  startup: startup,
-  validateOptions: validateOptions
+  doLookup,
+  startup,
+  validateOptions,
+  onMessage
 };

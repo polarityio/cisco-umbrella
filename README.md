@@ -24,6 +24,19 @@ Select one of more statuses that will be returned. The default is to only return
 
 Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 
+
+### Allow Blocklist Submission
+Allows you to submit a domain to be blocklisted on Cisco Umbrella.
+
+### Cisco Umbrella Enforcement API URL
+The URL of the Cisco Umbrella Enforcement API including the schema (i.e., https://).
+
+### Customer Key
+Your Customer Key which can be found/generated in the Dashboard under Policies/Integrations.
+
+### Event Types
+A Comma-Separated List of Event Types for when submitting domains to your Blocklist.
+
 ## Installation Instructions
 
 Installation instructions for integrations are provided on the [PolarityIO GitHub Page](https://polarityio.github.io/).

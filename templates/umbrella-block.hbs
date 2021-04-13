@@ -20,3 +20,87 @@
         <span class="tag content-tag">{{content}}</span>
     {{/each}}
 {{/if}}
+
+{{#if block.userOptions.allowBlocklistSubmission}}
+    <h1 class="p-title submission-options py-1">
+        {{fa-icon "cog" size="sm" fixedWidth=true}} Blocklist Submission Options
+    </h1>
+
+    <div class="select-container">
+        <span class="p-value">Domain: &nbsp;</span>
+        <input
+            type="text"
+            class="text-input"
+            placeholder="Enter Domain..."
+            onchange={{action (mut domain) value="target.value"}}
+            value={{domain}}
+            disabled={{interactionDisabled}}
+        />
+    </div>
+
+    <div class="select-container">
+        <span class="p-value">Url: &nbsp;</span>
+        <input
+            type="text"
+            class="text-input"
+            placeholder="Enter Url..."
+            onchange={{action (mut url) value="target.value"}}
+            value={{url}}
+            disabled={{interactionDisabled}}
+        />
+    </div>
+
+    <div class="select-container">
+        <span class="p-value">Description: &nbsp;</span>
+        <input
+            type="text"
+            class="text-input"
+            placeholder="Enter description..."
+            onchange={{action (mut description) value="target.value"}}
+            value={{description}}
+            disabled={{interactionDisabled}}
+        />
+    </div>
+
+    <div class="select-container">
+        <span class="p-value">Event Type: </span>
+        <select class="w-100" onchange={{action (mut eventType) value="target.value"}} disabled={{interactionDisabled}}>
+            {{#each eventTypes as |eventType|}}
+                <option value={{eventType}}>{{eventType}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="select-container">
+        <span class="p-value">Event Severity: </span>
+        <select class="w-100" onchange={{action (mut eventSeverity) value="target.value"}} disabled={{interactionDisabled}}>
+            {{#each eventSeverities as |eventSeverity|}}
+                <option value={{eventSeverity}}>{{eventSeverity}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
+        <button {{action "addDomainToBlocklist"}}
+                disabled={{interactionDisabled}}
+                class="p-btn btn btn-secondary m-0">
+            {{#if submitIsRunning}}
+                {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+            {{else}}
+                Submit To Blocklist
+            {{/if}}
+        </button>
+
+        {{#if submitMessage}}
+            <div class="submit-message alert alert-info m-0">
+                {{submitMessage}}
+            </div>
+        {{/if}}
+
+        {{#if submitErrorMessage}}
+            <div class="submit-message alert alert-danger m-0">
+                {{submitErrorMessage}}
+            </div>
+        {{/if}}
+    </div>
+{{/if}}
