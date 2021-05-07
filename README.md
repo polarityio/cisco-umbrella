@@ -28,14 +28,21 @@ Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 ### Allow Blocklist Submission
 Allows you to submit a domain to be blocklisted on Cisco Umbrella.
 
-### Cisco Umbrella Enforcement API URL
-The URL of the Cisco Umbrella Enforcement API including the schema (i.e., https://).
+### Cisco Umbrella Management API URL
+The URL of the Cisco Umbrella Management API including the schema (i.e., https://).
 
-### Customer Key
-Your Customer Key which can be found/generated in the Dashboard under Policies/Integrations.
+### Network Device API Key
+An API Key that is created using the "Umbrella Network Device" option selected.
 
-### Event Types
-A Comma-Separated List of Event Types for when submitting domains to your Blocklist.
+### Network Device Secret Key
+They Secret Key that is created using the "Umbrella Network Device" option selected.
+
+### Management API Key
+An API Key that is created using the "Umbrella Management" option selected.
+
+### Management Secret Key
+They Secret Key that is created using the "Umbrella Management" option selected.
+
 
 ## Installation Instructions
 

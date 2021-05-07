@@ -53,7 +53,7 @@ function doLookup(entities, options, cb) {
   let lookupResults = [];
   
   options.investigateUrl = options.investigateUrl.endsWith('/') ? options.investigateUrl.slice(0, -1) : options.investigateUrl;
-  options.enforcementUrl = options.enforcementUrl.endsWith('/') ? options.enforcementUrl.slice(0, -1) : options.enforcementUrl;
+  options.managementUrl = options.managementUrl.endsWith('/') ? options.managementUrl.slice(0, -1) : options.managementUrl;
 
   const eventTypes = splitCommaOption(options.eventTypes);
   const eventSeverities = splitCommaOption(options.eventSeverities);
