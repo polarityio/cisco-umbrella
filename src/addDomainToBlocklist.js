@@ -62,7 +62,7 @@ const checkForStatusErrors = (statusCode, body, Logger) => {
   let possibleError = new Error();
 
   if (statusCode === 401) {
-    possibleError.message = 'InvalidCredentials: Invalid Customer Key';
+    possibleError.message = 'InvalidCredentials: API or Secret Key. Ensure your keys were created with the correct options selected.';
     throw possibleError;
   }
 
