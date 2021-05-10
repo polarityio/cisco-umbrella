@@ -3,11 +3,8 @@ polarity.export = PolarityComponent.extend({
   details: Ember.computed.alias('block.data.details'),
   eventTypes: Ember.computed.alias('block.data.details.eventTypes'),
   eventSeverities: Ember.computed.alias('block.data.details.eventSeverities'),
-  description: '',
+  comment: '',
   domain: '',
-  url: '',
-  eventType: '',
-  eventSeverity: '',
   submitMessage: '',
   submitErrorMessage: '',
   submitIsRunning: false,
@@ -15,11 +12,7 @@ polarity.export = PolarityComponent.extend({
     return Ember.String.htmlSafe(`status-color-${this.details.status}`);
   }),
   init() {
-    const domain = this.get('block.entity.value').toLowerCase();
-    this.set('domain', domain);
-    this.set('url', `http://${domain}`);
-    this.set('eventType', this.get('block.data.details.eventTypes')[0]);
-    this.set('eventSeverity', this.get('block.data.details.eventSeverities')[0]);
+    this.set('domain', this.get('block.entity.value').toLowerCase());
 
     this._super(...arguments);
   },
@@ -30,10 +23,6 @@ polarity.export = PolarityComponent.extend({
         {
           condition: () => !outerThis.get('domain').length,
           message: 'Domain is Required...'
-        },
-        {
-          condition: () => !outerThis.get('url').length,
-          message: 'Url is Required...'
         }
       ];
 
@@ -61,10 +50,7 @@ polarity.export = PolarityComponent.extend({
           action: 'addDomainToBlocklist',
           data: {
             domain: outerThis.get('domain'),
-            url: outerThis.get('url'),
-            description: outerThis.get('description'),
-            eventType: outerThis.get('eventType'),
-            eventSeverity: outerThis.get('eventSeverity')
+            comment: outerThis.get('comment')
           }
         })
         .then(({ message }) => {
@@ -73,7 +59,7 @@ polarity.export = PolarityComponent.extend({
         .catch((err) => {
           outerThis.set(
             'submitErrorMessage',
-            'Failed to submit IOC: ' + (err && (err.detail || err.message || err.title || err.description)) ||
+            'Failed to Block Domain: ' + (err && (err.detail || err.message || err.title || err.comment)) ||
               'Unknown Reason'
           );
         })

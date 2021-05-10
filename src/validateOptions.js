@@ -5,12 +5,17 @@ const validateOptions = (options, callback) => {
   const stringOptionsErrorMessages = {
     investigateUrl: 'You must provide a valid Investigation URL',
     apiKey: 'You must provide a valid API Key from your Cisco Umbrella Account',
-    ...(options.allowBlocklistSubmission.value && { enforcementUrl: 'You must provide a valid Enforcement URL' }),
     ...(options.allowBlocklistSubmission.value && {
-      customerKey: 'You must provide a valid Customer Key from your Cisco Umbrella Account'
-    }),
-    ...(options.allowBlocklistSubmission.value && { eventTypes: 'You must provide at least one Event Type' }),
-    ...(options.allowBlocklistSubmission.value && { enforcementUrl: 'You must provide at least one Event Severity' })
+      managementUrl: 'You must provide a valid Management URL',
+      networkDevicesApiKey:
+        'You must provide a valid API Key that is created using the "Umbrella Network Device" option selected on your Cisco Umbrella Account',
+      networkDevicesSecretKey:
+        'You must provide a valid Secret Key that is created using the "Umbrella Network Device" option selected on your Cisco Umbrella Account',
+      managementApiKey:
+        'You must provide a valid API Key that is created using the "Umbrella Management" option selected on your Cisco Umbrella Account',
+      managementSecretKey:
+        'You must provide a valid Secret Key that is created using the "Umbrella Management" option selected on your Cisco Umbrella Account',
+    })
   };
 
   const stringValidationErrors = _validateStringOptions(
@@ -19,9 +24,9 @@ const validateOptions = (options, callback) => {
   );
 
   const investigateUrlValidationError = _validateUrlOption(options, 'investigateUrl');
-  const enforcementUrlValidationError = _validateUrlOption(options, 'enforcementUrl');
+  const managementUrlValidationError = _validateUrlOption(options, 'managementUrl');
 
-  callback(null, stringValidationErrors.concat(investigateUrlValidationError).concat(enforcementUrlValidationError));
+  callback(null, stringValidationErrors.concat(investigateUrlValidationError).concat(managementUrlValidationError));
 };
 
 const _validateStringOptions = (stringOptionsErrorMessages, options, otherErrors = []) =>

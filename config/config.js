@@ -138,38 +138,47 @@ module.exports = {
       adminOnly: false
     },
     {
-      key: 'enforcementUrl',
-      name: 'Cisco Umbrella Enforcement API URL',
-      description: 'The URL of the Cisco Umbrella Enforcement API including the schema (i.e., https://).',
-      default: 'https://s-platform.api.opendns.com',
+      key: 'managementUrl',
+      name: 'Cisco Umbrella Management API URL',
+      description: 'The URL of the Cisco Umbrella Management API including the schema (i.e., https://).',
+      default: 'https://management.api.umbrella.com',
       type: 'text',
       userCanEdit: false,
       adminOnly: true
     },
     {
-      key: 'customerKey',
-      name: 'Customer Key',
-      description: 'Your Customer Key which can be found/generated in the Dashboard under Policies/Integrations.',
+      key: 'networkDevicesApiKey',
+      name: 'Network Device API Key',
+      description: 'An API Key that is created using the "Umbrella Network Device" option selected.',
       default: '',
       type: 'password',
       userCanEdit: true,
       adminOnly: false
     },
     {
-      key: 'eventTypes',
-      name: 'Event Types',
-      description: 'A Comma-Separated List of Event Types for when submitting domains to your Blocklist.',
-      default: 'Unknown',
-      type: 'text',
+      key: 'networkDevicesSecretKey',
+      name: 'Network Device Secret Key',
+      description: 'They Secret Key that is created using the "Umbrella Network Device" option selected.',
+      default: '',
+      type: 'password',
       userCanEdit: true,
       adminOnly: false
     },
     {
-      key: 'eventSeverities',
-      name: 'Event Severities',
-      description: 'A Comma-Separated List of Event Severities for when submitting domains to your Blocklist.',
-      default: 'Unknown, Severe, Bad, High, Medium, Low',
-      type: 'text',
+      key: 'managementApiKey',
+      name: 'Management API Key',
+      description: 'An API Key that is created using the "Umbrella Management" option selected.',
+      default: '',
+      type: 'password',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'managementSecretKey',
+      name: 'Management Secret Key',
+      description: 'They Secret Key that is created using the "Umbrella Management" option selected.',
+      default: '',
+      type: 'password',
       userCanEdit: true,
       adminOnly: false
     }
