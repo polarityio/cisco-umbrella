@@ -3,7 +3,7 @@ polarity.export = PolarityComponent.extend({
   details: Ember.computed.alias('block.data.details'),
   eventTypes: Ember.computed.alias('block.data.details.eventTypes'),
   eventSeverities: Ember.computed.alias('block.data.details.eventSeverities'),
-  comment: '',
+  comment: 'Blocked from Polarity',
   domain: '',
   submitMessage: '',
   submitErrorMessage: '',
@@ -23,6 +23,10 @@ polarity.export = PolarityComponent.extend({
         {
           condition: () => !outerThis.get('domain').length,
           message: 'Domain is Required...'
+        },
+        {
+          condition: () => !outerThis.get('comment').length,
+          message: 'Comment is Required...'
         }
       ];
 
