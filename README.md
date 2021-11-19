@@ -28,6 +28,9 @@ Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 ### Allow Blocklist Submission
 Allows you to submit a domain to be blocklisted on Cisco Umbrella.
 
+### Allow Allowlist Submission
+Allows you to submit a domain to be allowlisted on Cisco Umbrella.
+
 ### Cisco Umbrella Management API URL
 The URL of the Cisco Umbrella Management API including the schema (i.e., https://).
 

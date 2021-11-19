@@ -1,12 +1,30 @@
 'use strict';
 
-const request = require('request');
+const request = require('postman-request');
 const config = require('./config/config');
 const async = require('async');
 const fs = require('fs');
-const fp = require('lodash/fp');
-const addDomainToBlocklist = require('./src/addDomainToBlocklist');
+
+const {
+  compact,
+  flow,
+  split,
+  map,
+  trim,
+  get,
+  toLower,
+  chunk,
+  fromPairs
+} = require('lodash/fp');
+
 const validateOptions = require('./src/validateOptions');
+const getCategorization = require('./src/getCategorization');
+const addBlocklistDataToLookupResults = require('./src/addBlocklistDataToLookupResults');
+const addDomainToBlocklist = require('./src/addDomainToBlocklist');
+const removeDomainFromBlocklist = require('./src/removeDomainFromBlocklist');
+const addAllowlistDataToLookupResults = require('./src/addAllowlistDataToLookupResults');
+const addDomainToAllowlist = require('./src/addDomainToAllowlist');
+const removeDomainFromAllowlist = require('./src/removeDomainFromAllowlist');
 
 let Logger;
 let requestWithDefaults;
@@ -24,7 +42,10 @@ function startup(logger) {
     defaults.key = fs.readFileSync(config.request.key);
   }
 
-  if (typeof config.request.passphrase === 'string' && config.request.passphrase.length > 0) {
+  if (
+    typeof config.request.passphrase === 'string' &&
+    config.request.passphrase.length > 0
+  ) {
     defaults.passphrase = config.request.passphrase;
   }
 
@@ -47,118 +68,83 @@ function startup(logger) {
     });
 }
 
-const splitCommaOption = fp.flow(fp.split(','), fp.map(fp.trim));
 
-function doLookup(entities, options, cb) {
+async function doLookup(entities, options, cb) {
   let lookupResults = [];
-  
-  options.investigateUrl = options.investigateUrl.endsWith('/') ? options.investigateUrl.slice(0, -1) : options.investigateUrl;
-  options.managementUrl = options.managementUrl.endsWith('/') ? options.managementUrl.slice(0, -1) : options.managementUrl;
+
+  options.investigateUrl = options.investigateUrl.endsWith('/')
+    ? options.investigateUrl.slice(0, -1)
+    : options.investigateUrl;
+
+  options.managementUrl = options.managementUrl.endsWith('/')
+    ? options.managementUrl.slice(0, -1)
+    : options.managementUrl;
+
+  Logger.trace({ entities }, 'doLookup');
 
   const eventTypes = splitCommaOption(options.eventTypes);
   const eventSeverities = splitCommaOption(options.eventSeverities);
 
-  Logger.trace({ entities }, 'doLookup');
-
-  const entityLookup = fp.flow(
-    fp.map((entity) => [fp.flow(fp.get('value'), fp.toLower)(entity), entity]),
-    fp.fromPairs
+  const entityLookup = flow(
+    map((entity) => [flow(get('value'), toLower)(entity), entity]),
+    fromPairs
   )(entities);
 
-  const queryGroups = fp.flow(fp.map(fp.flow(fp.get('value'), fp.toLower)), fp.chunk(50))(entities);
+  const queryGroups = getQueryGroups(entities);
 
   let validStatuses = new Set();
   options.statuses.forEach((status) => {
     validStatuses.add(+status.value);
   });
 
-  async.each(
-    queryGroups,
-    (query, next) => {
-      let requestOptions = {
-        method: 'POST',
-        // Umbrella REST API is case sensitive even though case should not matter for domains
-        uri: `${options.investigateUrl}/domains/categorization?showlabels`,
-        headers: {
-          Authorization: `Bearer ${options.apiKey}`
-        },
-        body: query,
-        json: true
-      };
+  try {
+    await async.each(
+      queryGroups,
+      getCategorization(
+        eventTypes,
+        eventSeverities,
+        entityLookup,
+        validStatuses,
+        lookupResults,
+        options,
+        requestWithDefaults,
+        Logger
+      )
+    );
+    
+    lookupResults = await addBlocklistDataToLookupResults(
+      lookupResults,
+      options,
+      asyncRequestWithDefault,
+      Logger
+    );
 
-      Logger.trace({ requestOptions }, 'Request Options');
+    lookupResults = await addAllowlistDataToLookupResults(
+      lookupResults,
+      options,
+      asyncRequestWithDefault,
+      Logger
+    );
 
-      requestWithDefaults(requestOptions, (err, response, body) => {
-        if (err) {
-          return next({
-            detail: 'Error making HTTP Request',
-            err: err
-          });
-        }
-
-        Logger.trace({ body }, 'Result Body');
-
-        if (response.statusCode === 403) {
-          return next({
-            detail: 'Invalid API Key'
-          });
-        }
-
-        if (response.statusCode !== 200) {
-          return next({
-            detail: 'Unexpected HTTP Status Code',
-            body: body
-          });
-        }
-
-        for (const [entityValue, result] of Object.entries(body)) {
-          if (validStatuses.has(result.status)) {
-            result.statusHuman = _convertStatusToHumanReadable(result.status);
-            lookupResults.push({
-              entity: entityLookup[entityValue],
-              data: {
-                summary: _getTags(result),
-                details: { ...result, eventTypes, eventSeverities }
-              }
-            });
-          }
-        }
-
-        next();
-      });
-    },
-    (err) => {
-      cb(err, lookupResults);
-    }
-  );
-}
-
-function _getTags(result) {
-  let tags = [];
-  tags.push(`Status: ${result.statusHuman}`);
-  result.security_categories.forEach((secCat) => {
-    tags.push(secCat);
-  });
-  result.content_categories.forEach((conCat) => {
-    tags.push(conCat);
-  });
-  return tags;
-}
-
-function _convertStatusToHumanReadable(status) {
-  switch (status) {
-    case 0:
-      return 'Uncategorized';
-    case -1:
-      return 'Malicious';
-    case 1:
-      return 'Benign';
-    default:
-      return 'Unknown';
+    return cb(null, lookupResults);
+  } catch (err) {
+    cb(err, lookupResults);
   }
 }
 
-const getOnMessage = { addDomainToBlocklist };
+const splitCommaOption = flow(split(','), map(trim), compact);
+
+const getQueryGroups = flow(
+  map(flow(get('value'), toLower)),
+  chunk(50)
+);
+
+const getOnMessage = {
+  addDomainToBlocklist,
+  removeDomainFromBlocklist,
+  addDomainToAllowlist,
+  removeDomainFromAllowlist
+};
 
 const onMessage = ({ action, data: actionParams }, options, callback) =>
   getOnMessage[action](actionParams, options, asyncRequestWithDefault, callback, Logger);

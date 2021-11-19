@@ -65,11 +65,11 @@ module.exports = {
     // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
     // the url parameter (by embedding the auth info in the uri)
     proxy: '',
-    
+
     rejectUnauthorized: true
   },
   logging: {
-    level: 'info' //trace, debug, info, warn, error, fatal
+    level: 'trace' //trace, debug, info, warn, error, fatal
   },
   /**
    * Options that are displayed to the user/admin in the Polarity integration user-interface.  Should be structured
@@ -82,7 +82,8 @@ module.exports = {
     {
       key: 'investigateUrl',
       name: 'Cisco Umbrella Investigate API URL',
-      description: 'The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://)',
+      description:
+        'The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://)',
       default: 'https://investigate.api.umbrella.com',
       type: 'text',
       userCanEdit: false,
@@ -138,9 +139,19 @@ module.exports = {
       adminOnly: false
     },
     {
+      key: 'allowAllowlistSubmission',
+      name: 'Allow Allowlist Submission',
+      description: 'Allows you to submit a domain to be allowlisted on Cisco Umbrella.',
+      default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
       key: 'managementUrl',
       name: 'Cisco Umbrella Management API URL',
-      description: 'The URL of the Cisco Umbrella Management API including the schema (i.e., https://).',
+      description:
+        'The URL of the Cisco Umbrella Management API including the schema (i.e., https://).',
       default: 'https://management.api.umbrella.com',
       type: 'text',
       userCanEdit: false,
@@ -149,7 +160,8 @@ module.exports = {
     {
       key: 'networkDevicesApiKey',
       name: 'Network Device API Key',
-      description: 'An API Key that is created using the "Umbrella Network Device" option selected.',
+      description:
+        'An API Key that is created using the "Umbrella Network Device" option selected.',
       default: '',
       type: 'password',
       userCanEdit: true,
@@ -158,7 +170,8 @@ module.exports = {
     {
       key: 'networkDevicesSecretKey',
       name: 'Network Device Secret Key',
-      description: 'They Secret Key that is created using the "Umbrella Network Device" option selected.',
+      description:
+        'They Secret Key that is created using the "Umbrella Network Device" option selected.',
       default: '',
       type: 'password',
       userCanEdit: true,
@@ -167,7 +180,8 @@ module.exports = {
     {
       key: 'managementApiKey',
       name: 'Management API Key',
-      description: 'An API Key that is created using the "Umbrella Management" option selected.',
+      description:
+        'An API Key that is created using the "Umbrella Management" option selected.',
       default: '',
       type: 'password',
       userCanEdit: true,
@@ -176,7 +190,8 @@ module.exports = {
     {
       key: 'managementSecretKey',
       name: 'Management Secret Key',
-      description: 'They Secret Key that is created using the "Umbrella Management" option selected.',
+      description:
+        'They Secret Key that is created using the "Umbrella Management" option selected.',
       default: '',
       type: 'password',
       userCanEdit: true,
