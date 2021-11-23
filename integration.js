@@ -20,9 +20,10 @@ const {
 const validateOptions = require('./src/validateOptions');
 const getCategorization = require('./src/getCategorization');
 const addBlocklistDataToLookupResults = require('./src/addBlocklistDataToLookupResults');
+const addAllowlistDataToLookupResults = require('./src/addAllowlistDataToLookupResults');
+const addWhoIsDataToLookupResults = require('./src/addWhoIsDataToLookupResults');
 const addDomainToBlocklist = require('./src/addDomainToBlocklist');
 const removeDomainFromBlocklist = require('./src/removeDomainFromBlocklist');
-const addAllowlistDataToLookupResults = require('./src/addAllowlistDataToLookupResults');
 const addDomainToAllowlist = require('./src/addDomainToAllowlist');
 const removeDomainFromAllowlist = require('./src/removeDomainFromAllowlist');
 
@@ -126,6 +127,14 @@ async function doLookup(entities, options, cb) {
       Logger
     );
 
+    lookupResults = await addWhoIsDataToLookupResults(
+      lookupResults,
+      options,
+      asyncRequestWithDefault,
+      Logger
+    );
+
+    Logger.trace({ lookupResults }, 'Lookup Results');
     return cb(null, lookupResults);
   } catch (err) {
     cb(err, lookupResults);

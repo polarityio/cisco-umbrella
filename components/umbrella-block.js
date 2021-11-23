@@ -3,6 +3,9 @@ polarity.export = PolarityComponent.extend({
   details: Ember.computed.alias('block.data.details'),
   eventTypes: Ember.computed.alias('block.data.details.eventTypes'),
   eventSeverities: Ember.computed.alias('block.data.details.eventSeverities'),
+  timezone: Ember.computed('Intl', function () {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }),
   blockComment: 'Blocked from Polarity',
   allowComment: 'Added from Polarity',
   domain: '',
@@ -21,6 +24,7 @@ polarity.export = PolarityComponent.extend({
   statusClass: Ember.computed('details.status', function () {
     return Ember.String.htmlSafe(`status-color-${this.details.status}`);
   }),
+
   init() {
     this.set('domain', this.get('block.entity.value').toLowerCase());
 

@@ -1,17 +1,91 @@
 <div>
-  <span class="p-key">Status: </span>
-  <span class="p-value {{statusClass}}">{{details.statusHuman}}</span>
+  {{#if (and statusClass details.statusHuman)}}
+    <div>
+      <span class="p-key">Status: </span>
+      <span class="p-value {{statusClass}}">{{details.statusHuman}}</span>
+    </div>
+  {{/if}}
+  {{#if details.isInBlocklist}}
+    <div>
+      <span class="p-key">Found In Global Blocklist</span>
+    </div>
+  {{/if}}
+  {{#if details.isInAllowlist}}
+    <div>
+      <span class="p-key">Found In Global Allowlist</span>
+    </div>
+  {{/if}}
+  {{#if details.whoIsData}}
+    {{#if details.whoIsData.registrarName}}
+      <div>
+        <span class="p-key">Registrar Name: </span>
+        <span class="p-value">{{details.whoIsData.registrarName}}</span>
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.registrarIANAID}}
+      <div>
+        <span class="p-key">IANAID: </span>
+        <span class="p-value">{{details.whoIsData.registrarIANAID}}</span>
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.created}}
+      <div>
+        <span class="p-key">Created: </span>
+        <span class="p-value">{{moment-format
+            details.whoIsData.created
+            "MMMM, DD, YYYY"
+            timeZone=timezone
+          }}</span>
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.updated}}
+      <div>
+        <span class="p-key">Updated: </span>
+        <span class="p-value">{{moment-format
+            details.whoIsData.updated
+            "MMMM, DD, YYYY"
+            timeZone=timezone
+          }}</span>
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.expires}}
+      <div>
+        <span class="p-key">Expires: </span>
+        <span class="p-value">{{moment-format
+            details.whoIsData.expires
+            "MMMM, DD, YYYY"
+            timeZone=timezone
+          }}</span>
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.emails}}
+      <span class="p-key">Email Addresses: </span>
+      <div>
+        {{#each details.whoIsData.emails as |email|}}
+          <span class="tag content-tag">
+            {{email}}
+          </span>
+        {{/each}}
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.nameServers}}
+      <span class="p-key">Nameservers: </span>
+      <div>
+        {{#each details.whoIsData.nameServers as |nameServer|}}
+          <span class="tag content-tag">
+            {{nameServer}}
+          </span>
+        {{/each}}
+      </div>
+    {{/if}}
+    {{#if details.whoIsData.administrativeContactName}}
+      <div>
+        <span class="p-key">Contact Name: </span>
+        <span class="p-value">{{details.whoIsData.administrativeContactName}}</span>
+      </div>
+    {{/if}}
+  {{/if}}
 </div>
-{{#if details.isInBlocklist}}
-  <div>
-    <span class="p-key">Found In Global Blocklist</span>
-  </div>
-{{/if}}
-{{#if details.isInAllowlist}}
-  <div>
-    <span class="p-key">Found In Global Allowlist</span>
-  </div>
-{{/if}}
 
 {{#if (gt details.security_categories.length 0)}}
   <div class="p-title">
@@ -33,171 +107,170 @@
   {{/each}}
 {{/if}}
 
-
-{{#if block.userOptions.allowBlocklistSubmission}}
-  <h1 class="p-title submission-options py-1">
-    {{fa-icon "cog" size="sm" fixedWidth=true}}
-    Blocklist Submission Options
-  </h1>
-  {{#if details.isInBlocklist}}
-    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
-      <button
-        {{action "removeDomainFromBlocklist"}}
-        disabled={{interactionDisabled}}
-        class="submit-btn p-btn btn btn-secondary m-0"
-      >
-        {{#if removeBlocklistIsRunning}}
-          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-        {{else}}
-          Remove From Blocklist
-        {{/if}}
-      </button>
-
-      {{#if removeBlocklistMessage}}
-        <div class="submit-message alert alert-info m-0">
-          {{removeBlocklistMessage}}
-        </div>
+{{!-- {{#if block.userOptions.allowBlocklistSubmission}} --}}
+<h1 class="p-title submission-options">
+  {{fa-icon "cog" size="sm" fixedWidth=true}}
+  Blocklist Submission Options
+</h1>
+{{#if details.isInBlocklist}}
+  <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
+    <button
+      {{action "removeDomainFromBlocklist"}}
+      disabled={{interactionDisabled}}
+      class="submit-btn p-btn btn btn-secondary m-0"
+    >
+      {{#if removeBlocklistIsRunning}}
+        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+      {{else}}
+        Remove From Blocklist
       {{/if}}
+    </button>
 
-      {{#if removeBlocklistErrorMessage}}
-        <div class="submit-message alert alert-danger m-0">
-          {{removeBlocklistErrorMessage}}
-        </div>
+    {{#if removeBlocklistMessage}}
+      <div class="submit-message alert alert-info m-0">
+        {{removeBlocklistMessage}}
+      </div>
+    {{/if}}
+
+    {{#if removeBlocklistErrorMessage}}
+      <div class="submit-message alert alert-danger m-0">
+        {{removeBlocklistErrorMessage}}
+      </div>
+    {{/if}}
+  </div>
+{{else}}
+  <div class="select-container">
+    <span class="p-value">Domain: &nbsp;</span>
+    <input
+      type="text"
+      class="text-input"
+      placeholder="Enter Domain..."
+      onchange={{action (mut domain) value="target.value"}}
+      value={{domain}}
+      disabled={{interactionDisabled}}
+    />
+  </div>
+
+  <div class="select-container">
+    <span class="p-value">Comment: &nbsp;</span>
+    <input
+      type="text"
+      class="text-input"
+      placeholder="Enter comment..."
+      onchange={{action (mut blockComment) value="target.value"}}
+      value={{blockComment}}
+      disabled={{interactionDisabled}}
+    />
+  </div>
+
+  <div class="d-flex flex-row-reverse justify-content-between align-items-center">
+    <button
+      {{action "addDomainToBlocklist"}}
+      disabled={{interactionDisabled}}
+      class="submit-btn p-btn btn btn-secondary m-0"
+    >
+      {{#if submitBlocklistIsRunning}}
+        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+      {{else}}
+        Submit To Blocklist
       {{/if}}
-    </div>
-  {{else}}
-    <div class="select-container">
-      <span class="p-value">Domain: &nbsp;</span>
-      <input
-        type="text"
-        class="text-input"
-        placeholder="Enter Domain..."
-        onchange={{action (mut domain) value="target.value"}}
-        value={{domain}}
-        disabled={{interactionDisabled}}
-      />
-    </div>
+    </button>
 
-    <div class="select-container">
-      <span class="p-value">Comment: &nbsp;</span>
-      <input
-        type="text"
-        class="text-input"
-        placeholder="Enter comment..."
-        onchange={{action (mut blockComment) value="target.value"}}
-        value={{blockComment}}
-        disabled={{interactionDisabled}}
-      />
-    </div>
+    {{#if submitBlocklistMessage}}
+      <div class="submit-message alert alert-info m-0">
+        {{submitBlocklistMessage}}
+      </div>
+    {{/if}}
 
-    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
-      <button
-        {{action "addDomainToBlocklist"}}
-        disabled={{interactionDisabled}}
-        class="submit-btn p-btn btn btn-secondary m-0"
-      >
-        {{#if submitBlocklistIsRunning}}
-          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-        {{else}}
-          Submit To Blocklist
-        {{/if}}
-      </button>
-
-      {{#if submitBlocklistMessage}}
-        <div class="submit-message alert alert-info m-0">
-          {{submitBlocklistMessage}}
-        </div>
-      {{/if}}
-
-      {{#if submitBlocklistErrorMessage}}
-        <div class="submit-message alert alert-danger m-0">
-          {{submitBlocklistErrorMessage}}
-        </div>
-      {{/if}}
-    </div>
-  {{/if}}
+    {{#if submitBlocklistErrorMessage}}
+      <div class="submit-message alert alert-danger m-0">
+        {{submitBlocklistErrorMessage}}
+      </div>
+    {{/if}}
+  </div>
 {{/if}}
+{{!-- {{/if}} --}}
 
-{{#if block.userOptions.allowAllowlistSubmission}}
-  <h1 class="p-title submission-options py-1">
-    {{fa-icon "cog" size="sm" fixedWidth=true}}
-    Allowlist Submission Options
-  </h1>
-  {{#if details.isInAllowlist}}
-    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
-      <button
-        {{action "removeDomainFromAllowlist"}}
-        disabled={{interactionDisabled}}
-        class="submit-btn p-btn btn btn-secondary m-0"
-      >
-        {{#if removeAllowlistIsRunning}}
-          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-        {{else}}
-          Remove From Allowlist
-        {{/if}}
-      </button>
-
-      {{#if removeAllowlistMessage}}
-        <div class="submit-message alert alert-info m-0">
-          {{removeAllowlistMessage}}
-        </div>
+{{!-- {{#if block.userOptions.allowAllowlistSubmission}} --}}
+<h1 class="p-title submission-options">
+  {{fa-icon "cog" size="sm" fixedWidth=true}}
+  Allowlist Submission Options
+</h1>
+{{#if details.isInAllowlist}}
+  <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
+    <button
+      {{action "removeDomainFromAllowlist"}}
+      disabled={{interactionDisabled}}
+      class="submit-btn p-btn btn btn-secondary m-0"
+    >
+      {{#if removeAllowlistIsRunning}}
+        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+      {{else}}
+        Remove From Allowlist
       {{/if}}
+    </button>
 
-      {{#if removeAllowlistErrorMessage}}
-        <div class="submit-message alert alert-danger m-0">
-          {{removeAllowlistErrorMessage}}
-        </div>
+    {{#if removeAllowlistMessage}}
+      <div class="submit-message alert alert-info m-0">
+        {{removeAllowlistMessage}}
+      </div>
+    {{/if}}
+
+    {{#if removeAllowlistErrorMessage}}
+      <div class="submit-message alert alert-danger m-0">
+        {{removeAllowlistErrorMessage}}
+      </div>
+    {{/if}}
+  </div>
+{{else}}
+  <div class="select-container">
+    <span class="p-value">Domain: &nbsp;</span>
+    <input
+      type="text"
+      class="text-input"
+      placeholder="Enter Domain..."
+      onchange={{action (mut domain) value="target.value"}}
+      value={{domain}}
+      disabled={{interactionDisabled}}
+    />
+  </div>
+
+  <div class="select-container">
+    <span class="p-value">Comment: &nbsp;</span>
+    <input
+      type="text"
+      class="text-input"
+      placeholder="Enter comment..."
+      onchange={{action (mut allowComment) value="target.value"}}
+      value={{allowComment}}
+      disabled={{interactionDisabled}}
+    />
+  </div>
+
+  <div class="d-flex flex-row-reverse justify-content-between align-items-center">
+    <button
+      {{action "addDomainToAllowlist"}}
+      disabled={{interactionDisabled}}
+      class="submit-btn p-btn btn btn-secondary m-0"
+    >
+      {{#if submitAllowlistIsRunning}}
+        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+      {{else}}
+        Submit To Allowlist
       {{/if}}
-    </div>
-  {{else}}
-    <div class="select-container">
-      <span class="p-value">Domain: &nbsp;</span>
-      <input
-        type="text"
-        class="text-input"
-        placeholder="Enter Domain..."
-        onchange={{action (mut domain) value="target.value"}}
-        value={{domain}}
-        disabled={{interactionDisabled}}
-      />
-    </div>
+    </button>
 
-    <div class="select-container">
-      <span class="p-value">Comment: &nbsp;</span>
-      <input
-        type="text"
-        class="text-input"
-        placeholder="Enter comment..."
-        onchange={{action (mut allowComment) value="target.value"}}
-        value={{allowComment}}
-        disabled={{interactionDisabled}}
-      />
-    </div>
+    {{#if submitAllowlistMessage}}
+      <div class="submit-message alert alert-info m-0">
+        {{submitAllowlistMessage}}
+      </div>
+    {{/if}}
 
-    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
-      <button
-        {{action "addDomainToAllowlist"}}
-        disabled={{interactionDisabled}}
-        class="submit-btn p-btn btn btn-secondary m-0"
-      >
-        {{#if submitAllowlistIsRunning}}
-          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-        {{else}}
-          Submit To Allowlist
-        {{/if}}
-      </button>
-
-      {{#if submitAllowlistMessage}}
-        <div class="submit-message alert alert-info m-0">
-          {{submitAllowlistMessage}}
-        </div>
-      {{/if}}
-
-      {{#if submitAllowlistErrorMessage}}
-        <div class="submit-message alert alert-danger m-0">
-          {{submitAllowlistErrorMessage}}
-        </div>
-      {{/if}}
-    </div>
-  {{/if}}
+    {{#if submitAllowlistErrorMessage}}
+      <div class="submit-message alert alert-danger m-0">
+        {{submitAllowlistErrorMessage}}
+      </div>
+    {{/if}}
+  </div>
 {{/if}}
+{{!-- {{/if}} --}}
