@@ -5,7 +5,8 @@ const validateOptions = (options, callback) => {
   const stringOptionsErrorMessages = {
     investigateUrl: 'You must provide a valid Investigation URL',
     apiKey: 'You must provide a valid API Key from your Cisco Umbrella Account',
-    ...(options.allowBlocklistSubmission.value && {
+    ...((options.allowBlocklistSubmission.value ||
+      options.allowAllowlistSubmission.value) && {
       managementUrl: 'You must provide a valid Management URL',
       networkDevicesApiKey:
         'You must provide a valid API Key that is created using the "Umbrella Network Device" option selected on your Cisco Umbrella Account',
@@ -14,7 +15,7 @@ const validateOptions = (options, callback) => {
       managementApiKey:
         'You must provide a valid API Key that is created using the "Umbrella Management" option selected on your Cisco Umbrella Account',
       managementSecretKey:
-        'You must provide a valid Secret Key that is created using the "Umbrella Management" option selected on your Cisco Umbrella Account',
+        'You must provide a valid Secret Key that is created using the "Umbrella Management" option selected on your Cisco Umbrella Account'
     })
   };
 

@@ -131,31 +131,31 @@ module.exports = {
 
     {
       key: 'getWhoIsData',
-      name: 'Get WHOIS Data for Domains',
+      name: 'Get WHOIS Data',
       description: 'If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.',
       default: true,
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false
     },
-    // {
-    //   key: 'allowBlocklistSubmission',
-    //   name: 'Allow Blocklist Submission',
-    //   description: 'Allows you to submit a domain to be blocklisted on Cisco Umbrella.',
-    //   default: true,
-    //   type: 'boolean',
-    //   userCanEdit: true,
-    //   adminOnly: false
-    // },
-    // {
-    //   key: 'allowAllowlistSubmission',
-    //   name: 'Allow Allowlist Submission',
-    //   description: 'Allows you to submit a domain to be allowlisted on Cisco Umbrella.',
-    //   default: true,
-    //   type: 'boolean',
-    //   userCanEdit: true,
-    //   adminOnly: false
-    // },
+    {
+      key: 'allowBlocklistSubmission',
+      name: 'Allow Blocklist Submission',
+      description: 'Allows you to submit a domain to be blocklisted on Cisco Umbrella.',
+      default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'allowAllowlistSubmission',
+      name: 'Allow Allowlist Submission',
+      description: 'Allows you to submit a domain to be allowlisted on Cisco Umbrella.',
+      default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
     {
       key: 'managementUrl',
       name: 'Cisco Umbrella Management API URL',

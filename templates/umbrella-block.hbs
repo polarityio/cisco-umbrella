@@ -15,7 +15,12 @@
       <span class="p-key">Found In Global Allowlist</span>
     </div>
   {{/if}}
-  {{#if details.whoIsData}}
+
+  {{#if (and block.userOptions.getWhoIsData details.whoIsData)}}
+    <div class="p-title">
+      {{fa-icon "browser" fixedWidth=true}}
+      WHOIS Record Data
+    </div>
     {{#if details.whoIsData.registrarName}}
       <div>
         <span class="p-key">Registrar Name: </span>
@@ -107,170 +112,170 @@
   {{/each}}
 {{/if}}
 
-{{!-- {{#if block.userOptions.allowBlocklistSubmission}} --}}
-<h1 class="p-title submission-options">
-  {{fa-icon "cog" size="sm" fixedWidth=true}}
-  Blocklist Submission Options
-</h1>
-{{#if details.isInBlocklist}}
-  <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
-    <button
-      {{action "removeDomainFromBlocklist"}}
-      disabled={{interactionDisabled}}
-      class="submit-btn p-btn btn btn-secondary m-0"
-    >
-      {{#if removeBlocklistIsRunning}}
-        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-      {{else}}
-        Remove From Blocklist
+{{#if block.userOptions.allowBlocklistSubmission}}
+  <h1 class="p-title submission-options">
+    {{fa-icon "cog" size="sm" fixedWidth=true}}
+    Blocklist Submission Options
+  </h1>
+  {{#if details.isInBlocklist}}
+    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
+      <button
+        {{action "removeDomainFromBlocklist"}}
+        disabled={{interactionDisabled}}
+        class="submit-btn p-btn btn btn-secondary m-0"
+      >
+        {{#if removeBlocklistIsRunning}}
+          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+        {{else}}
+          Remove From Blocklist
+        {{/if}}
+      </button>
+
+      {{#if removeBlocklistMessage}}
+        <div class="submit-message alert alert-info m-0">
+          {{removeBlocklistMessage}}
+        </div>
       {{/if}}
-    </button>
 
-    {{#if removeBlocklistMessage}}
-      <div class="submit-message alert alert-info m-0">
-        {{removeBlocklistMessage}}
-      </div>
-    {{/if}}
-
-    {{#if removeBlocklistErrorMessage}}
-      <div class="submit-message alert alert-danger m-0">
-        {{removeBlocklistErrorMessage}}
-      </div>
-    {{/if}}
-  </div>
-{{else}}
-  <div class="select-container">
-    <span class="p-value">Domain: &nbsp;</span>
-    <input
-      type="text"
-      class="text-input"
-      placeholder="Enter Domain..."
-      onchange={{action (mut domain) value="target.value"}}
-      value={{domain}}
-      disabled={{interactionDisabled}}
-    />
-  </div>
-
-  <div class="select-container">
-    <span class="p-value">Comment: &nbsp;</span>
-    <input
-      type="text"
-      class="text-input"
-      placeholder="Enter comment..."
-      onchange={{action (mut blockComment) value="target.value"}}
-      value={{blockComment}}
-      disabled={{interactionDisabled}}
-    />
-  </div>
-
-  <div class="d-flex flex-row-reverse justify-content-between align-items-center">
-    <button
-      {{action "addDomainToBlocklist"}}
-      disabled={{interactionDisabled}}
-      class="submit-btn p-btn btn btn-secondary m-0"
-    >
-      {{#if submitBlocklistIsRunning}}
-        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-      {{else}}
-        Submit To Blocklist
+      {{#if removeBlocklistErrorMessage}}
+        <div class="submit-message alert alert-danger m-0">
+          {{removeBlocklistErrorMessage}}
+        </div>
       {{/if}}
-    </button>
+    </div>
+  {{else}}
+    <div class="select-container">
+      <span class="p-value">Domain: &nbsp;</span>
+      <input
+        type="text"
+        class="text-input"
+        placeholder="Enter Domain..."
+        onchange={{action (mut domain) value="target.value"}}
+        value={{domain}}
+        disabled={{interactionDisabled}}
+      />
+    </div>
 
-    {{#if submitBlocklistMessage}}
-      <div class="submit-message alert alert-info m-0">
-        {{submitBlocklistMessage}}
-      </div>
-    {{/if}}
+    <div class="select-container">
+      <span class="p-value">Comment: &nbsp;</span>
+      <input
+        type="text"
+        class="text-input"
+        placeholder="Enter comment..."
+        onchange={{action (mut blockComment) value="target.value"}}
+        value={{blockComment}}
+        disabled={{interactionDisabled}}
+      />
+    </div>
 
-    {{#if submitBlocklistErrorMessage}}
-      <div class="submit-message alert alert-danger m-0">
-        {{submitBlocklistErrorMessage}}
-      </div>
-    {{/if}}
-  </div>
+    <div class="d-flex flex-row-reverse justify-content-between align-items-center">
+      <button
+        {{action "addDomainToBlocklist"}}
+        disabled={{interactionDisabled}}
+        class="submit-btn p-btn btn btn-secondary m-0"
+      >
+        {{#if submitBlocklistIsRunning}}
+          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+        {{else}}
+          Submit To Blocklist
+        {{/if}}
+      </button>
+
+      {{#if submitBlocklistMessage}}
+        <div class="submit-message alert alert-info m-0">
+          {{submitBlocklistMessage}}
+        </div>
+      {{/if}}
+
+      {{#if submitBlocklistErrorMessage}}
+        <div class="submit-message alert alert-danger m-0">
+          {{submitBlocklistErrorMessage}}
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
 {{/if}}
-{{!-- {{/if}} --}}
 
-{{!-- {{#if block.userOptions.allowAllowlistSubmission}} --}}
-<h1 class="p-title submission-options">
-  {{fa-icon "cog" size="sm" fixedWidth=true}}
-  Allowlist Submission Options
-</h1>
-{{#if details.isInAllowlist}}
-  <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
-    <button
-      {{action "removeDomainFromAllowlist"}}
-      disabled={{interactionDisabled}}
-      class="submit-btn p-btn btn btn-secondary m-0"
-    >
-      {{#if removeAllowlistIsRunning}}
-        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-      {{else}}
-        Remove From Allowlist
+{{#if block.userOptions.allowAllowlistSubmission}}
+  <h1 class="p-title submission-options">
+    {{fa-icon "cog" size="sm" fixedWidth=true}}
+    Allowlist Submission Options
+  </h1>
+  {{#if details.isInAllowlist}}
+    <div class="d-flex flex-row-reverse justify-content-between align-items-center mt-2">
+      <button
+        {{action "removeDomainFromAllowlist"}}
+        disabled={{interactionDisabled}}
+        class="submit-btn p-btn btn btn-secondary m-0"
+      >
+        {{#if removeAllowlistIsRunning}}
+          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+        {{else}}
+          Remove From Allowlist
+        {{/if}}
+      </button>
+
+      {{#if removeAllowlistMessage}}
+        <div class="submit-message alert alert-info m-0">
+          {{removeAllowlistMessage}}
+        </div>
       {{/if}}
-    </button>
 
-    {{#if removeAllowlistMessage}}
-      <div class="submit-message alert alert-info m-0">
-        {{removeAllowlistMessage}}
-      </div>
-    {{/if}}
-
-    {{#if removeAllowlistErrorMessage}}
-      <div class="submit-message alert alert-danger m-0">
-        {{removeAllowlistErrorMessage}}
-      </div>
-    {{/if}}
-  </div>
-{{else}}
-  <div class="select-container">
-    <span class="p-value">Domain: &nbsp;</span>
-    <input
-      type="text"
-      class="text-input"
-      placeholder="Enter Domain..."
-      onchange={{action (mut domain) value="target.value"}}
-      value={{domain}}
-      disabled={{interactionDisabled}}
-    />
-  </div>
-
-  <div class="select-container">
-    <span class="p-value">Comment: &nbsp;</span>
-    <input
-      type="text"
-      class="text-input"
-      placeholder="Enter comment..."
-      onchange={{action (mut allowComment) value="target.value"}}
-      value={{allowComment}}
-      disabled={{interactionDisabled}}
-    />
-  </div>
-
-  <div class="d-flex flex-row-reverse justify-content-between align-items-center">
-    <button
-      {{action "addDomainToAllowlist"}}
-      disabled={{interactionDisabled}}
-      class="submit-btn p-btn btn btn-secondary m-0"
-    >
-      {{#if submitAllowlistIsRunning}}
-        {{fa-icon "spinner-third" fixedWidth=true spin=true}}
-      {{else}}
-        Submit To Allowlist
+      {{#if removeAllowlistErrorMessage}}
+        <div class="submit-message alert alert-danger m-0">
+          {{removeAllowlistErrorMessage}}
+        </div>
       {{/if}}
-    </button>
+    </div>
+  {{else}}
+    <div class="select-container">
+      <span class="p-value">Domain: &nbsp;</span>
+      <input
+        type="text"
+        class="text-input"
+        placeholder="Enter Domain..."
+        onchange={{action (mut domain) value="target.value"}}
+        value={{domain}}
+        disabled={{interactionDisabled}}
+      />
+    </div>
 
-    {{#if submitAllowlistMessage}}
-      <div class="submit-message alert alert-info m-0">
-        {{submitAllowlistMessage}}
-      </div>
-    {{/if}}
+    <div class="select-container">
+      <span class="p-value">Comment: &nbsp;</span>
+      <input
+        type="text"
+        class="text-input"
+        placeholder="Enter comment..."
+        onchange={{action (mut allowComment) value="target.value"}}
+        value={{allowComment}}
+        disabled={{interactionDisabled}}
+      />
+    </div>
 
-    {{#if submitAllowlistErrorMessage}}
-      <div class="submit-message alert alert-danger m-0">
-        {{submitAllowlistErrorMessage}}
-      </div>
-    {{/if}}
-  </div>
+    <div class="d-flex flex-row-reverse justify-content-between align-items-center">
+      <button
+        {{action "addDomainToAllowlist"}}
+        disabled={{interactionDisabled}}
+        class="submit-btn p-btn btn btn-secondary m-0"
+      >
+        {{#if submitAllowlistIsRunning}}
+          {{fa-icon "spinner-third" fixedWidth=true spin=true}}
+        {{else}}
+          Submit To Allowlist
+        {{/if}}
+      </button>
+
+      {{#if submitAllowlistMessage}}
+        <div class="submit-message alert alert-info m-0">
+          {{submitAllowlistMessage}}
+        </div>
+      {{/if}}
+
+      {{#if submitAllowlistErrorMessage}}
+        <div class="submit-message alert alert-danger m-0">
+          {{submitAllowlistErrorMessage}}
+        </div>
+      {{/if}}
+    </div>
+  {{/if}}
 {{/if}}
-{{!-- {{/if}} --}}
