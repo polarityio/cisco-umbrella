@@ -24,9 +24,16 @@ Select one of more statuses that will be returned. The default is to only return
 
 Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 
+### Get WHOIS Data
+If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.
 
 ### Allow Blocklist Submission
 Allows you to submit a domain to be blocklisted on Cisco Umbrella.
+
+
+### Allow Allowlist Submission
+Allows you to submit a domain to be allowlisted on Cisco Umbrella.
+
 
 ### Cisco Umbrella Management API URL
 The URL of the Cisco Umbrella Management API including the schema (i.e., https://).

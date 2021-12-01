@@ -1,12 +1,11 @@
 {
   "main": "./integration.js",
   "name": "CiscoUmbrella",
-  "version": "3.0.3-beta",
+  "version": "3.1.0-beta",
   "private": true,
   "dependencies": {
     "async": "^3.1.0",
     "lodash": "^4.17.21",
-    "moment": "^2.29.1",
-    "request": "^2.88.0"
+    "postman-request": "^2.88.1-postman.30"
   }
 }
