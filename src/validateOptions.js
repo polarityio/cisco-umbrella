@@ -19,7 +19,7 @@ const validateOptions = (options, callback) => {
     })
   };
 
-  const stringValidationErrors = _validateStringOptions(
+   const stringValidationErrors = _validateStringOptions(
     stringOptionsErrorMessages,
     options
   );
