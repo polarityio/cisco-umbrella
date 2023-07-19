@@ -64,10 +64,10 @@ module.exports = {
     ca: '',
     // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
     // the url parameter (by embedding the auth info in the uri)
-    proxy: ""
+    proxy: ''
   },
   logging: {
-    level: 'info' //trace, debug, info, warn, error, fatal
+    level: 'trace' //trace, debug, info, warn, error, fatal
   },
   /**
    * Options that are displayed to the user/admin in the Polarity integration user-interface.  Should be structured
@@ -130,7 +130,8 @@ module.exports = {
     {
       key: 'getWhoIsData',
       name: 'Get WHOIS Data',
-      description: 'If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.',
+      description:
+        'If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.',
       default: true,
       type: 'boolean',
       userCanEdit: true,
