@@ -17,22 +17,25 @@ const checkForStatusErrors = (statusCode, body, Logger) => {
   }
 };
 
-const getOrganizationId = async (options, requestWithDefaults, Logger) => {
+const getOrganizationId = async (token, options, requestWithDefaults, Logger) => {
+  Logger.trace({ token }, 'token');
   try {
     const result = await requestWithDefaults({
-      url: `${options.managementUrl}/v1/organizations`,
-      auth: {
-        username: options.networkDevicesApiKey,
-        password: options.networkDevicesSecretKey
+      method: 'GET',
+      url: `${options.umbrellaUrl}/admin/v2/organizations`,
+      headers: {
+        Authorization: `Bearer ${token.access_token}`
       },
       json: true
     });
+    Logger.trace({ result }, 'result_ids');
     const statusCode = result.statusCode;
     const body = result.body;
     checkForStatusErrors(statusCode, body, Logger);
 
     return fp.get('0.organizationId', body);
   } catch (requestError) {
+    Logger.trace({ requestError }, 'Request Error');
     Logger.error(requestError, 'Request Error');
     let httpError = new Error();
     httpError.message = requestError.message;
@@ -42,21 +45,25 @@ const getOrganizationId = async (options, requestWithDefaults, Logger) => {
 };
 
 const getGlobalDestinationListId = async (
+  token,
   listName,
-  organizationId,
   options,
   requestWithDefaults,
   Logger
 ) => {
   try {
-    const result = await requestWithDefaults({
-      url: `${options.managementUrl}/v1/organizations/${organizationId}/destinationlists`,
-      auth: {
-        username: options.managementApiKey,
-        password: options.managementSecretKey
+    const requestOptions = {
+      method: 'GET',
+      url: `${options.umbrellaUrl}/policies/v2/destinationlists`,
+      headers: {
+        Authorization: `Bearer ${token.access_token}`
       },
       json: true
-    });
+    };
+
+    Logger.trace({ requestOptions }, 'requestOptions');
+    const result = await requestWithDefaults(requestOptions);
+
     const statusCode = result.statusCode;
     const body = result.body;
     checkForStatusErrors(statusCode, body, Logger);
