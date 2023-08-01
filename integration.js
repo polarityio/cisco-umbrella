@@ -4,6 +4,7 @@ const request = require('postman-request');
 const config = require('./config/config');
 const async = require('async');
 const fs = require('fs');
+const NodeCache = require('node-cache');
 
 const {
   compact,
@@ -30,6 +31,8 @@ const removeDomainFromAllowlist = require('./src/removeDomainFromAllowlist');
 let Logger;
 let requestWithDefaults;
 let asyncRequestWithDefault;
+
+const tokenCache = new NodeCache();
 
 function startup(logger) {
   Logger = logger;
@@ -76,105 +79,144 @@ async function doLookup(entities, options, cb) {
     ? options.investigateUrl.slice(0, -1)
     : options.investigateUrl;
 
-  options.managementUrl = options.managementUrl.endsWith('/')
-    ? options.managementUrl.slice(0, -1)
-    : options.managementUrl;
+  options.umbrellaUrl = options.umbrellaUrl.endsWith('/')
+    ? options.umbrellaUrl.slice(0, -1)
+    : options.umbrellaUrl;
 
   Logger.trace({ entities }, 'doLookup');
 
-  const token = await getAuth(options, asyncRequestWithDefault, Logger);
-  Logger.trace({ token }, 'token');
+  const token = await getToken(options, asyncRequestWithDefault, Logger);
 
-  // const eventTypes = splitCommaOption(options.eventTypes);
-  // const eventSeverities = splitCommaOption(options.eventSeverities);
+  const eventTypes = splitCommaOption(options.eventTypes);
+  const eventSeverities = splitCommaOption(options.eventSeverities);
 
-  // const entityLookup = flow(
-  //   map((entity) => [flow(get('value'), toLower)(entity), entity]),
-  //   fromPairs
-  // )(entities);
+  const entityLookup = flow(
+    map((entity) => [flow(get('value'), toLower)(entity), entity]),
+    fromPairs
+  )(entities);
 
-  // const queryGroups = getQueryGroups(entities);
+  const queryGroups = getQueryGroups(entities);
 
-  // let validStatuses = new Set();
+  let validStatuses = new Set();
 
-  // options.statuses.forEach((status) => {
-  //   validStatuses.add(+status.value);
-  // });
+  options.statuses.forEach((status) => {
+    validStatuses.add(+status.value);
+  });
 
   try {
-    // await async.each(
-    //   queryGroups,
-    //   getCategorization(
-    //     eventTypes,
-    //     eventSeverities,
-    //     entityLookup,
-    //     validStatuses,
-    //     lookupResults,
-    //     options,
-    //     requestWithDefaults,
-    //     Logger
-    //   )
-    // );
-    // lookupResults = await addBlocklistDataToLookupResults(
-    //   lookupResults,
-    //   options,
-    //   asyncRequestWithDefault,
-    //   Logger
-    // );
-    // lookupResults = await addAllowlistDataToLookupResults(
-    //   lookupResults,
-    //   options,
-    //   asyncRequestWithDefault,
-    //   Logger
-    // );
-    // lookupResults = await addWhoIsDataToLookupResults(
-    //   lookupResults,
-    //   options,
-    //   asyncRequestWithDefault,
-    //   Logger
-    // );
-    // Logger.trace({ lookupResults }, 'Lookup Results');
-    // return cb(null, lookupResults);
+    await async.each(
+      queryGroups,
+      getCategorization(
+        eventTypes,
+        eventSeverities,
+        entityLookup,
+        validStatuses,
+        lookupResults,
+        options,
+        requestWithDefaults,
+        Logger
+      )
+    );
+    lookupResults = await addBlocklistDataToLookupResults(
+      token,
+      lookupResults,
+      options,
+      asyncRequestWithDefault,
+      Logger
+    );
+    lookupResults = await addAllowlistDataToLookupResults(
+      token,
+      lookupResults,
+      options,
+      asyncRequestWithDefault,
+      Logger
+    );
+    lookupResults = await addWhoIsDataToLookupResults(
+      lookupResults,
+      options,
+      asyncRequestWithDefault,
+      Logger
+    );
+    Logger.trace({ lookupResults }, 'Lookup Results');
+    return cb(null, lookupResults);
   } catch (err) {
     cb(err, lookupResults);
   }
 }
 
-async function getAuth(options, asyncRequestWithDefault, Logger) {
-  const apiKey = '2e0ea8956a054ca8998e75321f0fdc3a';
-  const secretKey = 'f4aa17b29e944bf88a51001c5d9e1c55';
-
-  const credentials = `${apiKey}:${secretKey}`;
-  const encodedCredentials = Buffer.from(credentials).toString('base64');
-
-  Logger.trace({ encodedCredentials }, 'encodedCredentials');
-
+async function getToken(options, asyncRequestWithDefault, Logger) {
   const response = await asyncRequestWithDefault({
-    url: 'https://api.umbrella.com/auth/v2/token',
+    url: `${options.umbrellaUrl}/auth/v2/token`,
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-      Authorization: encodedCredentials
-    }
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    auth: {
+      user: options.apiKey,
+      pass: options.secretKey
+    },
+    form: {
+      grant_type: 'client_credentials'
+    },
+    json: true
   });
 
   Logger.trace({ response }, 'Response');
+  tokenCache.set('token', response.body, response.body.expires_in - 60);
+  return response.body;
 }
 
 const splitCommaOption = flow(split(','), map(trim), compact);
-
 const getQueryGroups = flow(map(flow(get('value'), toLower)), chunk(50));
 
-const getOnMessage = {
-  addDomainToBlocklist,
-  removeDomainFromBlocklist,
-  addDomainToAllowlist,
-  removeDomainFromAllowlist
-};
+async function onMessage(payload, options, callback) {
+  const token = tokenCache.get('token');
 
-const onMessage = ({ action, data: actionParams }, options, callback) =>
-  getOnMessage[action](actionParams, options, asyncRequestWithDefault, callback, Logger);
+  switch (payload.action) {
+    case 'addDomainToBlocklist':
+      const addBlockList = await addDomainToBlocklist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      return callback(null, addBlockList);
+    case 'addDomainToAllowlist':
+      const addAllowList = await addDomainToAllowlist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      return callback(null, addAllowList);
+    case 'removeDomainFromAllowlist':
+      const removeDomainFromAllowList = await removeDomainFromAllowlist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      return callback(null, removeDomainFromAllowList);
+    case 'removeDomainFromBlocklist':
+      const removeDomainFromBlockList = await removeDomainFromBlocklist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      return callback(null, removeDomainFromBlockList);
+    default:
+      return callback({ err: 'Invalid action' });
+  }
+}
 
 module.exports = {
   doLookup,
@@ -182,23 +224,3 @@ module.exports = {
   validateOptions,
   onMessage
 };
-
-// var request = require('request');
-
-// headers = {
-//     "Content-Type": "application/x-www-form-urlencoded",
-//     "Accept": "application/json",
-//     "Authorization": "Basic Og=="
-// }
-// body = null;
-// var options = {
-//     method: 'POST',
-//     url: 'https://api.umbrella.com/auth/v2/token',
-//     headers,
-//     body,
-// };
-
-// request(options, function (error, response) {
-//     if (error) throw new Error(error);
-//     console.log(response.body);
-// });

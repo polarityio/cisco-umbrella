@@ -18,16 +18,13 @@ const getCategorization =
   (query, next) => {
     let requestOptions = {
       method: 'POST',
-      // Umbrella REST API is case sensitive even though case should not matter for domains
       uri: `${options.investigateUrl}/domains/categorization?showlabels`,
       headers: {
-        Authorization: `Bearer ${options.apiKey}`
+        Authorization: `Bearer ${options.investigateApiKey}`
       },
       body: query,
       json: true
     };
-
-    Logger.trace({ requestOptions }, 'Request Options');
 
     requestWithDefaults(requestOptions, (err, response, body) => {
       if (err) {
@@ -36,8 +33,6 @@ const getCategorization =
           err: err
         });
       }
-
-      Logger.trace({ body }, 'Result Body');
 
       if (response.statusCode === 403) {
         return next({
@@ -62,6 +57,8 @@ const getCategorization =
               details: { ...result, eventTypes, eventSeverities }
             }
           });
+
+          Logger.trace({ lookupResults }, 'Lookup Results');
         }
       }
 
