@@ -78,6 +78,25 @@ module.exports = {
    */
   options: [
     {
+      key: 'apiKey',
+      name: 'API Key',
+      description: 'Valid Cisco Umbrella API Key',
+      default: '',
+      type: 'password',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'secretKey',
+      name: 'Secret Key',
+      description: 'Valid Cisco Umbrella Secret Key',
+      default: '',
+      type: 'password',
+      userCanEdit: true,
+      adminOnly: false
+    },
+
+    {
       key: 'investigateUrl',
       name: 'Cisco Umbrella Investigate API URL',
       description:
@@ -88,13 +107,24 @@ module.exports = {
       adminOnly: true
     },
     {
-      key: 'apiKey',
-      name: 'API Key',
-      description: 'Valid Cisco Umbrella API Key',
+      key: 'investigateApiKey',
+      name: 'Cisco Umbrella Investigate API key',
+      description:
+        'The Key of the Cisco Umbrella Investigate API including the schema (i.e., https://)',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'umbrellaUrl',
+      name: 'Cisco Umbrella Admin API URL',
+      description:
+        'The URL of the Cisco Umbrella Management API including the schema (i.e., https://).',
+      default: 'https://api.umbrella.com',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'statuses',
@@ -152,56 +182,6 @@ module.exports = {
       description: 'Allows you to submit a domain to be allowlisted on Cisco Umbrella.',
       default: true,
       type: 'boolean',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'managementUrl',
-      name: 'Cisco Umbrella Management API URL',
-      description:
-        'The URL of the Cisco Umbrella Management API including the schema (i.e., https://).',
-      default: 'https://management.api.umbrella.com',
-      type: 'text',
-      userCanEdit: false,
-      adminOnly: true
-    },
-    {
-      key: 'networkDevicesApiKey',
-      name: 'Network Device API Key',
-      description:
-        'An API Key that is created using the "Umbrella Network Device" option selected.',
-      default: '',
-      type: 'password',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'networkDevicesSecretKey',
-      name: 'Network Device Secret Key',
-      description:
-        'They Secret Key that is created using the "Umbrella Network Device" option selected.',
-      default: '',
-      type: 'password',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'managementApiKey',
-      name: 'Management API Key',
-      description:
-        'An API Key that is created using the "Umbrella Management" option selected.',
-      default: '',
-      type: 'password',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'managementSecretKey',
-      name: 'Management Secret Key',
-      description:
-        'They Secret Key that is created using the "Umbrella Management" option selected.',
-      default: '',
-      type: 'password',
       userCanEdit: true,
       adminOnly: false
     }
