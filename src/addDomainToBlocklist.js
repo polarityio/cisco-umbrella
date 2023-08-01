@@ -1,15 +1,11 @@
 const { flow, get, find, eq, toLower } = require('lodash/fp');
-const {
-  checkForStatusErrors,
-  getOrganizationId,
-  getGlobalDestinationListId
-} = require('./requestUtils');
+const { checkForStatusErrors, getGlobalDestinationListId } = require('./requestUtils');
 
 let organizationInfo;
-let apiKeysChanged;
 
 const addDomainToBlocklist = async (
-  { domain, comment },
+  payload,
+  token,
   options,
   requestWithDefaults,
   callback,
@@ -26,56 +22,46 @@ const addDomainToBlocklist = async (
     //TODO: Add in who is data from Umbrella to the integration.
 
     //TODO: add remove from blocklist and allow list?
+    options.managementSecretKey;
 
-    const apiKeys =
-      options.networkDevicesApiKey +
-      options.networkDevicesSecretKey +
-      options.managementApiKey +
-      options.managementSecretKey;
+    const globalBlockListId = await getGlobalDestinationListId(
+      token,
+      'Global Block List',
+      options,
+      requestWithDefaults,
+      Logger
+    );
 
-    if (!organizationInfo || apiKeys !== apiKeysChanged) {
-      const organizationId = await getOrganizationId(
-        options,
-        requestWithDefaults,
-        Logger
-      );
-      const globalBlockListId = await getGlobalDestinationListId(
-        'Global Block List',
-        organizationId,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-
-      apiKeysChanged = apiKeys;
-      organizationInfo = {
-        organizationId,
-        globalBlockListId
-      };
-    }
+    organizationInfo = {
+      globalBlockListId
+    };
 
     try {
-      const result = await requestWithDefaults({
+      const requestOptions = {
         method: 'POST',
-        url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalBlockListId}/destinations`,
-        auth: {
-          username: options.managementApiKey,
-          password: options.managementSecretKey
+        url: `${options.umbrellaUrl}/policies/v2/destinationlists/${organizationInfo.globalBlockListId}/destinations`,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token.access_token}`
         },
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify([
           {
-            destination: domain,
-            comment
+            destination: payload.domain,
+            comment: payload.comment
           }
         ])
-      });
+      };
+      Logger.trace(requestOptions, 'Request Options add');
+      const result = await requestWithDefaults(requestOptions);
+      Logger.trace(result, 'add result');
       const statusCode = result.statusCode;
       const body = result.body;
       checkForStatusErrors(statusCode, body, Logger);
 
       const newIsInBlocklist = await getIsInBlocklist(
-        domain,
+        token,
+        payload.domain,
         options,
         requestWithDefaults,
         Logger
@@ -105,15 +91,15 @@ const addDomainToBlocklist = async (
   }
 };
 
-const getIsInBlocklist = async (domain, options, requestWithDefaults, Logger) => {
+const getIsInBlocklist = async (token, domain, options, requestWithDefaults, Logger) => {
   const result = await requestWithDefaults({
-    url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalBlockListId}/destinations`,
+    url: `${options.umbrellaUrl}/policies/v2/destinationlists/${organizationInfo.globalBlockListId}/destinations`,
     method: 'GET',
-    auth: {
-      username: options.managementApiKey,
-      password: options.managementSecretKey
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token.access_token}`
     },
-    headers: { Accept: 'application/json' },
     json: true
   });
   const statusCode = result.statusCode;
@@ -122,11 +108,9 @@ const getIsInBlocklist = async (domain, options, requestWithDefaults, Logger) =>
 
   const newIsInBlocklist = flow(
     get('data'),
-    find(
-      flow(get('destination'), toLower, eq(toLower(domain)))
-    )
+    find(flow(get('destination'), toLower, eq(toLower(domain))))
   )(body);
-  
+
   return newIsInBlocklist;
 };
 module.exports = addDomainToBlocklist;
