@@ -1,56 +1,34 @@
-const {
-  checkForStatusErrors,
-  getOrganizationId,
-  getGlobalDestinationListId
-} = require('./requestUtils');
-
+const { checkForStatusErrors, getGlobalDestinationListId } = require('./requestUtils');
 const { map, get, flow, toLower, eq, find } = require('lodash/fp');
 
 let organizationInfo;
-let apiKeysChanged;
 
 const addAllowlistDataToLookupResults = async (
+  token,
   lookupResults,
   options,
   requestWithDefaults,
   Logger
 ) => {
   try {
-    const apiKeys =
-      options.networkDevicesApiKey +
-      options.networkDevicesSecretKey +
-      options.managementApiKey +
-      options.managementSecretKey;
+    const globalAllowListId = await getGlobalDestinationListId(
+      token,
+      'Global Allow List',
+      options,
+      requestWithDefaults,
+      Logger
+    );
 
-    if (!organizationInfo || apiKeys !== apiKeysChanged) {
-      const organizationId = await getOrganizationId(
-        options,
-        requestWithDefaults,
-        Logger
-      );
-      const globalAllowListId = await getGlobalDestinationListId(
-        "Global Allow List",
-        organizationId,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-
-      apiKeysChanged = apiKeys;
-      organizationInfo = {
-        organizationId,
-        globalAllowListId
-      };
-    }
+    organizationInfo = {
+      globalAllowListId
+    };
 
     const result = await requestWithDefaults({
-      url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalAllowListId}/destinations`,
+      url: `https://api.umbrella.com/policies/v2/destinationlists/${organizationInfo.globalAllowListId}/destinations`,
       method: 'GET',
-      auth: {
-        username: options.managementApiKey,
-        password: options.managementSecretKey
+      headers: {
+        Authorization: `Bearer ${token.access_token}`
       },
-      headers: { Accept: 'application/json' },
       json: true
     });
     const statusCode = result.statusCode;

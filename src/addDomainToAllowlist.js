@@ -1,70 +1,55 @@
 const { flow, get, find, eq, toLower } = require('lodash/fp');
-const {
-  checkForStatusErrors,
-  getOrganizationId,
-  getGlobalDestinationListId
-} = require('./requestUtils');
+const { checkForStatusErrors, getGlobalDestinationListId } = require('./requestUtils');
 
 let organizationInfo;
-let apiKeysChanged;
 
 const addDomainToAllowlist = async (
-  { domain, comment },
+  payload,
+  token,
   options,
   requestWithDefaults,
   callback,
   Logger
 ) => {
   try {
-    const apiKeys =
-      options.networkDevicesApiKey +
-      options.networkDevicesSecretKey +
-      options.managementApiKey +
-      options.managementSecretKey;
+    const globalAllowListId = await getGlobalDestinationListId(
+      token,
+      'Global Allow List',
+      options,
+      requestWithDefaults,
+      Logger
+    );
 
-    if (!organizationInfo || apiKeys !== apiKeysChanged) {
-      const organizationId = await getOrganizationId(
-        options,
-        requestWithDefaults,
-        Logger
-      );
-      const globalAllowListId = await getGlobalDestinationListId(
-        "Global Allow List",
-        organizationId,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-
-      apiKeysChanged = apiKeys;
-      organizationInfo = {
-        organizationId,
-        globalAllowListId
-      };
-    }
+    organizationInfo = {
+      globalAllowListId
+    };
 
     try {
-      const result = await requestWithDefaults({
+      const requestOptions = {
         method: 'POST',
-        url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalAllowListId}/destinations`,
-        auth: {
-          username: options.managementApiKey,
-          password: options.managementSecretKey
+        url: `${options.umbrellaUrl}/policies/v2/destinationlists/${organizationInfo.globalAllowListId}/destinations`,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token.access_token}`
         },
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify([
           {
-            destination: domain,
-            comment
+            destination: payload.domain,
+            comment: payload.comment
           }
         ])
-      });
+      };
+      Logger.trace(requestOptions, 'Request Options add');
+      const result = await requestWithDefaults(requestOptions);
+      Logger.trace(result, 'Result from add allowlist');
       const statusCode = result.statusCode;
       const body = result.body;
       checkForStatusErrors(statusCode, body, Logger);
 
       const newIsInAllowlist = await getIsInAllowlist(
-        domain,
+        token,
+        payload.domain,
         options,
         requestWithDefaults,
         Logger
@@ -94,15 +79,15 @@ const addDomainToAllowlist = async (
   }
 };
 
-const getIsInAllowlist = async (domain, options, requestWithDefaults, Logger) => {
+const getIsInAllowlist = async (token, domain, options, requestWithDefaults, Logger) => {
   const result = await requestWithDefaults({
-    url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalAllowListId}/destinations`,
     method: 'GET',
-    auth: {
-      username: options.managementApiKey,
-      password: options.managementSecretKey
+    url: `${options.umbrellaUrl}/policies/v2/destinationlists/${organizationInfo.globalAllowListId}/destinations`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token.access_token}`
     },
-    headers: { Accept: 'application/json' },
     json: true
   });
   const statusCode = result.statusCode;
@@ -111,11 +96,9 @@ const getIsInAllowlist = async (domain, options, requestWithDefaults, Logger) =>
 
   const newIsInAllowlist = flow(
     get('data'),
-    find(
-      flow(get('destination'), toLower, eq(toLower(domain)))
-    )
+    find(flow(get('destination'), toLower, eq(toLower(domain))))
   )(body);
-  
+
   return newIsInAllowlist;
 };
 module.exports = addDomainToAllowlist;

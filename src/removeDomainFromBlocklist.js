@@ -1,57 +1,38 @@
-const {
-  checkForStatusErrors,
-  getOrganizationId,
-  getGlobalDestinationListId
-} = require('./requestUtils');
+const { checkForStatusErrors, getGlobalDestinationListId } = require('./requestUtils');
 
 let organizationInfo;
-let apiKeysChanged;
 
 const removeDomainFromBlocklist = async (
   { isInBlocklist },
+  token,
   options,
   requestWithDefaults,
   callback,
   Logger
 ) => {
   try {
-    const apiKeys =
-      options.networkDevicesApiKey +
-      options.networkDevicesSecretKey +
-      options.managementApiKey +
-      options.managementSecretKey;
+    const globalBlockListId = await getGlobalDestinationListId(
+      token,
+      'Global Block List',
+      options,
+      requestWithDefaults,
+      Logger
+    );
 
-    if (!organizationInfo || apiKeys !== apiKeysChanged) {
-      const organizationId = await getOrganizationId(
-        options,
-        requestWithDefaults,
-        Logger
-      );
-      const globalBlockListId = await getGlobalDestinationListId(
-        'Global Block List',
-        organizationId,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-      
-      apiKeysChanged = apiKeys;
-      organizationInfo = {
-        organizationId,
-        globalBlockListId
-      };
-    }
+    organizationInfo = {
+      globalBlockListId
+    };
 
     let statusCode, body;
     try {
       const result = await requestWithDefaults({
         method: 'DELETE',
-        url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalBlockListId}/destinations/remove`,
-        auth: {
-          username: options.managementApiKey,
-          password: options.managementSecretKey
+        url: `${options.umbrellaUrl}/policies/v2/destinationlists/${organizationInfo.globalBlockListId}/destinations/remove`,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token.access_token}`
         },
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify([isInBlocklist.id])
       });
       statusCode = result.statusCode;
