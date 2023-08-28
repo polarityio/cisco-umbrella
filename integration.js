@@ -193,7 +193,14 @@ const splitCommaOption = flow(split(','), map(trim), compact);
 const getQueryGroups = flow(map(flow(get('value'), toLower)), chunk(50));
 
 async function onMessage(payload, options, callback) {
-  const token = tokenCache.get('token');
+  let token;
+  try {
+    token = await getToken(options, asyncRequestWithDefault, Logger);
+  } catch (tokenErr) {
+    let jsonErr = parseErrorToReadableJSON(tokenErr);
+    Logger.error({ err: jsonErr }, 'Error getting token in onMessage');
+    cb(jsonErr);
+  }
 
   switch (payload.action) {
     case 'addDomainToBlocklist':
