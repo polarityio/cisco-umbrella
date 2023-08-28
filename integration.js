@@ -140,7 +140,13 @@ async function doLookup(entities, options, cb) {
     Logger.trace({ lookupResults }, 'Lookup Results');
     return cb(null, lookupResults);
   } catch (err) {
-    cb(err, lookupResults);
+    if (err) {
+      let jsonError = parseErrorToReadableJSON(err);
+      Logger.error({ err: jsonError }, 'Error running lookup');
+      return cb(jsonError);
+    }
+
+    cb(null, lookupResults);
   }
 }
 
@@ -164,6 +170,10 @@ async function getToken(options, asyncRequestWithDefault, Logger) {
   Logger.trace({ response }, 'Response');
   tokenCache.set('token', response.body, response.body.expires_in - 60);
   return response.body;
+}
+
+function parseErrorToReadableJSON(error) {
+  return JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
 }
 
 const splitCommaOption = flow(split(','), map(trim), compact);
