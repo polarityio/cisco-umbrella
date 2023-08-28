@@ -1,60 +1,46 @@
-const {
-  checkForStatusErrors,
-  getOrganizationId,
-  getGlobalDestinationListId
-} = require('./requestUtils');
+const { checkForStatusErrors, getGlobalDestinationListId } = require('./requestUtils');
 
 const { map, get, flow, toLower, eq, find } = require('lodash/fp');
 
 let organizationInfo;
-let apiKeysChanged;
 
 const addBlocklistDataToLookupResults = async (
+  token,
   lookupResults,
   options,
   requestWithDefaults,
   Logger
 ) => {
   try {
-    const apiKeys =
-      options.networkDevicesApiKey +
-      options.networkDevicesSecretKey +
-      options.managementApiKey +
-      options.managementSecretKey;
+    const globalBlockListId = await getGlobalDestinationListId(
+      token,
+      'Global Block List',
+      options,
+      requestWithDefaults,
+      Logger
+    );
 
-    if (!organizationInfo || apiKeys !== apiKeysChanged) {
-      const organizationId = await getOrganizationId(
-        options,
-        requestWithDefaults,
-        Logger
-      );
-      const globalBlockListId = await getGlobalDestinationListId(
-        'Global Block List',
-        organizationId,
-        options,
-        requestWithDefaults,
-        Logger
-      );
+    organizationInfo = {
+      globalBlockListId
+    };
 
-      apiKeysChanged = apiKeys;
-      organizationInfo = {
-        organizationId,
-        globalBlockListId
-      };
-    }
-
-    const result = await requestWithDefaults({
-      url: `${options.managementUrl}/v1/organizations/${organizationInfo.organizationId}/destinationlists/${organizationInfo.globalBlockListId}/destinations`,
+    const requestOptions = {
+      url: `${options.umbrellaUrl}/policies/v2/destinationlists/${organizationInfo.globalBlockListId}/destinations`,
       method: 'GET',
-      auth: {
-        username: options.managementApiKey,
-        password: options.managementSecretKey
+      headers: {
+        Authorization: `Bearer ${token.access_token}`
       },
-      headers: { Accept: 'application/json' },
       json: true
-    });
+    };
+
+    Logger.trace({ requestOptions }, '__requestOptions__');
+
+    const result = await requestWithDefaults(requestOptions);
+    Logger.trace({ result }, 'result');
+
     const statusCode = result.statusCode;
     const body = result.body;
+
     checkForStatusErrors(statusCode, body, Logger);
 
     const updatedLookupResults = map((lookupResult) => {
@@ -70,10 +56,12 @@ const addBlocklistDataToLookupResults = async (
             )
           )
         )(body);
+
         lookupResult.data.details = {
           ...details,
           isInBlocklist
         };
+
         if (!!isInBlocklist) {
           lookupResult.data.summary = lookupResult.data.summary.concat(
             'Found in Global Blocklist'
@@ -83,6 +71,7 @@ const addBlocklistDataToLookupResults = async (
       return lookupResult;
     }, lookupResults);
 
+    Logger.trace({ updatedLookupResults }, 'updatedLookupResults');
     return updatedLookupResults;
   } catch (requestError) {
     Logger.error(requestError, 'Request Error');

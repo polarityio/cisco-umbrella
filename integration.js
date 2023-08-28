@@ -4,6 +4,7 @@ const request = require('postman-request');
 const config = require('./config/config');
 const async = require('async');
 const fs = require('fs');
+const NodeCache = require('node-cache');
 
 const {
   compact,
@@ -16,6 +17,9 @@ const {
   chunk,
   fromPairs
 } = require('lodash/fp');
+
+// Number of seconds before the API Key should expire to expire it
+const EXPIRE_THRESHOLD = 120;
 
 const validateOptions = require('./src/validateOptions');
 const getCategorization = require('./src/getCategorization');
@@ -30,6 +34,8 @@ const removeDomainFromAllowlist = require('./src/removeDomainFromAllowlist');
 let Logger;
 let requestWithDefaults;
 let asyncRequestWithDefault;
+
+const tokenCache = new NodeCache();
 
 function startup(logger) {
   Logger = logger;
@@ -69,7 +75,6 @@ function startup(logger) {
     });
 }
 
-
 async function doLookup(entities, options, cb) {
   let lookupResults = [];
 
@@ -77,28 +82,31 @@ async function doLookup(entities, options, cb) {
     ? options.investigateUrl.slice(0, -1)
     : options.investigateUrl;
 
-  options.managementUrl = options.managementUrl.endsWith('/')
-    ? options.managementUrl.slice(0, -1)
-    : options.managementUrl;
+  options.umbrellaUrl = options.umbrellaUrl.endsWith('/')
+    ? options.umbrellaUrl.slice(0, -1)
+    : options.umbrellaUrl;
 
   Logger.trace({ entities }, 'doLookup');
 
-  const eventTypes = splitCommaOption(options.eventTypes);
-  const eventSeverities = splitCommaOption(options.eventSeverities);
-
-  const entityLookup = flow(
-    map((entity) => [flow(get('value'), toLower)(entity), entity]),
-    fromPairs
-  )(entities);
-
-  const queryGroups = getQueryGroups(entities);
-
-  let validStatuses = new Set();
-  options.statuses.forEach((status) => {
-    validStatuses.add(+status.value);
-  });
-
   try {
+    const token = await getToken(options, asyncRequestWithDefault, Logger);
+
+    const eventTypes = splitCommaOption(options.eventTypes);
+    const eventSeverities = splitCommaOption(options.eventSeverities);
+
+    const entityLookup = flow(
+      map((entity) => [flow(get('value'), toLower)(entity), entity]),
+      fromPairs
+    )(entities);
+
+    const queryGroups = getQueryGroups(entities);
+
+    let validStatuses = new Set();
+
+    options.statuses.forEach((status) => {
+      validStatuses.add(+status.value);
+    });
+
     await async.each(
       queryGroups,
       getCategorization(
@@ -112,51 +120,133 @@ async function doLookup(entities, options, cb) {
         Logger
       )
     );
-    
     lookupResults = await addBlocklistDataToLookupResults(
+      token,
       lookupResults,
       options,
       asyncRequestWithDefault,
       Logger
     );
-
     lookupResults = await addAllowlistDataToLookupResults(
+      token,
       lookupResults,
       options,
       asyncRequestWithDefault,
       Logger
     );
-
     lookupResults = await addWhoIsDataToLookupResults(
       lookupResults,
       options,
       asyncRequestWithDefault,
       Logger
     );
-
     Logger.trace({ lookupResults }, 'Lookup Results');
     return cb(null, lookupResults);
   } catch (err) {
-    cb(err, lookupResults);
+    if (err) {
+      let jsonError = parseErrorToReadableJSON(err);
+      Logger.error({ err: jsonError }, 'Error running lookup');
+      return cb(jsonError);
+    }
+
+    cb(null, lookupResults);
   }
 }
 
+async function getToken(options, asyncRequestWithDefault, Logger) {
+  if (tokenCache.has(options.apiKey)) {
+    Logger.debug('Using cached token');
+    return tokenCache.get(options.apiKey);
+  }
+
+  Logger.debug('Generating fresh token');
+  const response = await asyncRequestWithDefault({
+    url: `${options.umbrellaUrl}/auth/v2/token`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    auth: {
+      user: options.apiKey,
+      pass: options.secretKey
+    },
+    form: {
+      grant_type: 'client_credentials'
+    },
+    json: true
+  });
+
+  tokenCache.set(
+    options.apiKey,
+    response.body,
+    response.body.expires_in - EXPIRE_THRESHOLD
+  );
+
+  return response.body;
+}
+
+function parseErrorToReadableJSON(error) {
+  return JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+}
+
 const splitCommaOption = flow(split(','), map(trim), compact);
+const getQueryGroups = flow(map(flow(get('value'), toLower)), chunk(50));
 
-const getQueryGroups = flow(
-  map(flow(get('value'), toLower)),
-  chunk(50)
-);
+async function onMessage(payload, options, callback) {
+  let token;
+  try {
+    token = await getToken(options, asyncRequestWithDefault, Logger);
+  } catch (tokenErr) {
+    let jsonErr = parseErrorToReadableJSON(tokenErr);
+    Logger.error({ err: jsonErr }, 'Error getting token in onMessage');
+    cb(jsonErr);
+  }
 
-const getOnMessage = {
-  addDomainToBlocklist,
-  removeDomainFromBlocklist,
-  addDomainToAllowlist,
-  removeDomainFromAllowlist
-};
-
-const onMessage = ({ action, data: actionParams }, options, callback) =>
-  getOnMessage[action](actionParams, options, asyncRequestWithDefault, callback, Logger);
+  switch (payload.action) {
+    case 'addDomainToBlocklist':
+      await addDomainToBlocklist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      break;
+    case 'addDomainToAllowlist':
+      await addDomainToAllowlist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      break;
+    case 'removeDomainFromAllowlist':
+      await removeDomainFromAllowlist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      break;
+    case 'removeDomainFromBlocklist':
+      await removeDomainFromBlocklist(
+        payload.data,
+        token,
+        options,
+        asyncRequestWithDefault,
+        callback,
+        Logger
+      );
+      break;
+    default:
+      return callback({ err: 'Invalid action' });
+  }
+}
 
 module.exports = {
   doLookup,

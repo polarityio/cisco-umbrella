@@ -1,7 +1,5 @@
 const { checkForStatusErrors } = require('./requestUtils');
-
 const { map, get, flow, toLower, eq, find } = require('lodash/fp');
-
 
 const addWhoIsDataToLookupResults = async (
   lookupResults,
@@ -12,14 +10,17 @@ const addWhoIsDataToLookupResults = async (
   try {
     const whoIsResults = await Promise.all(
       map(async ({ entity }) => {
-        const result = await requestWithDefaults({
+        const requestOptions = {
           url: `${options.investigateUrl}/whois/${entity.value}`,
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${options.apiKey}`
+            Authorization: `Bearer ${options.investigateApiKey}`
           },
           json: true
-        });
+        };
+        Logger.trace({ requestOptions }, '__requestOptions');
+        const result = await requestWithDefaults(requestOptions);
+        Logger.trace({ result }, '__result');
         const statusCode = result.statusCode;
         const body = result.body;
         checkForStatusErrors(statusCode, body, Logger);
@@ -44,14 +45,13 @@ const addWhoIsDataToLookupResults = async (
           whoIsData
         };
         if (!!whoIsData) {
-          lookupResult.data.summary = lookupResult.data.summary.concat(
-            'Found WHOIS'
-          );
+          lookupResult.data.summary = lookupResult.data.summary.concat('Found WHOIS');
         }
       }
       return lookupResult;
     }, lookupResults);
 
+    Logger.trace({ updatedLookupResults }, 'updatedLookupResults');
     return updatedLookupResults;
   } catch (requestError) {
     Logger.error(requestError, 'Request Error');
