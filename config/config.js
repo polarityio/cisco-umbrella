@@ -15,7 +15,7 @@ module.exports = {
    * @type String
    * @required
    */
-  acronym: 'ODNS',
+  acronym: 'UMB',
   /**
    * Description for this integration which is displayed in the Polarity integrations user interface
    *
@@ -78,51 +78,49 @@ module.exports = {
    */
   options: [
     {
-      key: 'apiKey',
-      name: 'API Key',
-      description: 'Valid Cisco Umbrella API Key',
-      default: '',
-      type: 'password',
-      userCanEdit: true,
-      adminOnly: false
+      key: 'umbrellaUrl',
+      name: 'Cisco Umbrella API URL',
+      description:
+        'The URL of the Cisco Umbrella API including the schema (i.e., https://).  Defaults to "https://api.umbrella.com".',
+      default: 'https://api.umbrella.com',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
     },
-    {
-      key: 'secretKey',
-      name: 'Secret Key',
-      description: 'Valid Cisco Umbrella Secret Key',
-      default: '',
-      type: 'password',
-      userCanEdit: true,
-      adminOnly: false
-    },
-
     {
       key: 'investigateUrl',
       name: 'Cisco Umbrella Investigate API URL',
       description:
-        'The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://)',
+        'The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://).  Defaults to "https://investigate.api.umbrella.com".',
       default: 'https://investigate.api.umbrella.com',
       type: 'text',
       userCanEdit: false,
       adminOnly: true
     },
     {
-      key: 'investigateApiKey',
-      name: 'Cisco Umbrella Investigate API key',
-      description:
-        'The Key of the Cisco Umbrella Investigate API including the schema (i.e., https://)',
+      key: 'apiKey',
+      name: 'Cisco Umbrella API Key',
+      description: 'Valid Cisco Umbrella API Key',
       default: '',
       type: 'password',
       userCanEdit: false,
       adminOnly: true
     },
     {
-      key: 'umbrellaUrl',
-      name: 'Cisco Umbrella Admin API URL',
-      description:
-        'The URL of the Cisco Umbrella Management API including the schema (i.e., https://).',
-      default: 'https://api.umbrella.com',
-      type: 'text',
+      key: 'secretKey',
+      name: 'Cisco Umbrella API Key Secret',
+      description: 'Valid Cisco Umbrella API Key Secret',
+      default: '',
+      type: 'password',
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'investigateApiKey',
+      name: 'Cisco Umbrella Investigate API key',
+      description: 'Valid Cisco Umbrella Investigate API key',
+      default: '',
+      type: 'password',
       userCanEdit: false,
       adminOnly: true
     },
@@ -130,8 +128,16 @@ module.exports = {
       key: 'statuses',
       name: 'Return Statuses',
       description:
-        'Select one of more statuses that will be returned when searching.  The default is to only return domains that have a status of "malicious".',
+        'Select one of more statuses that will be returned when searching.  The default is to all available domains.',
       default: [
+        {
+          value: '-1',
+          display: 'Malicious'
+        },
+        {
+          value: '1',
+          display: 'Benign'
+        },
         {
           value: '-1',
           display: 'Malicious'
@@ -153,36 +159,38 @@ module.exports = {
         }
       ],
       multiple: true,
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
 
     {
       key: 'getWhoIsData',
       name: 'Get WHOIS Data',
       description:
-        'If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.',
+        'If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses. Must be set to "Users can view only".',
       default: true,
       type: 'boolean',
-      userCanEdit: true,
+      userCanEdit: false,
       adminOnly: false
     },
     {
       key: 'allowBlocklistSubmission',
       name: 'Allow Blocklist Submission',
-      description: 'Allows you to submit a domain to be blocklisted on Cisco Umbrella.',
+      description:
+        'Allows you to submit a domain to be blocklisted on Cisco Umbrella.  Must be set to "Users can view only".',
       default: true,
       type: 'boolean',
-      userCanEdit: true,
+      userCanEdit: false,
       adminOnly: false
     },
     {
       key: 'allowAllowlistSubmission',
       name: 'Allow Allowlist Submission',
-      description: 'Allows you to submit a domain to be allowlisted on Cisco Umbrella.',
+      description:
+        'Allows you to submit a domain to be allowlisted on Cisco Umbrella. Must be set to "Users can view only".',
       default: true,
       type: 'boolean',
-      userCanEdit: true,
+      userCanEdit: false,
       adminOnly: false
     }
   ]

@@ -2,41 +2,44 @@
 
 Provides categorization information for domains. Will report whether a domain is uncategorized, malicious or benign and includes content and security category details.
 
-| ![image](images/overlay.png) |
-| ---------------------------- |
-| _Cisco Umbrella_             |
+| ![image](images/malicious.png) | ![image](images/benign.png) |
+|--------------------------------|-----------------------------|
+| _Malicious Domain_             | _Benign Domain_             |
 
 ## Options
 
+### Cisco Umbrella API URL
+
+The URL of the Cisco Umbrella API including the schema (i.e., https://). 
+
+Defaults to `https://api.umbrella.com`.
+
 ### Cisco Umbrella Investigate API URL
 
-The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://)
+The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://). 
 
-Defaults to `https://investigate.api.umbrella.com`
+Defaults to `https://investigate.api.umbrella.com`.
 
-### API Key
+
+### Cisco Umbrella API Key
 
 Valid Cisco Umbrella API Key
 
-### Secret Key
+> For information on generating the API Key and Secret Key please see https://developer.cisco.com/docs/cloud-security/#!authentication
+
+### Cisco Umbrella Secret Key
 
 Valid Cisco Umbrella Secret Key
 
-## Investigate URL
+## Cisco Umbrella Investigate API Key
 
-The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://)
+Valid Cisco Umbrella Investigate API key
 
-## Investigate API Key
-
-The API Key for the CISCO Umbrella Investigate API (i.e., https://)
-
-## Umbrella Admin API URL
-
-The URL of the Cisco Umbrella Management API including the schema (i.e., https://)
+> For information on how to generate a Cisco Umbrella Investigate API key please see https://developer.cisco.com/docs/cloud-security/#!investigate-api-getting-started/authentication
 
 ### Return Statuses
 
-Select one of more statuses that will be returned. The default is to only return domains that have a status of "malicious".
+Select one of more statuses that will be returned. The default is to only return all available domains.
 
 Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 
@@ -44,13 +47,19 @@ Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 
 If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.
 
+> Must be set to "Users can view only".
+
 ### Allow Blocklist Submission
 
 Allows you to submit a domain to be blocklisted on Cisco Umbrella.
 
+> Must be set to "Users can view only".
+
 ### Allow Allowlist Submission
 
 Allows you to submit a domain to be allowlisted on Cisco Umbrella.
+
+> Must be set to "Users can view only".
 
 ## Installation Instructions
 
