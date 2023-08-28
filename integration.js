@@ -204,7 +204,7 @@ async function onMessage(payload, options, callback) {
 
   switch (payload.action) {
     case 'addDomainToBlocklist':
-      const addBlockList = await addDomainToBlocklist(
+      await addDomainToBlocklist(
         payload.data,
         token,
         options,
@@ -212,9 +212,8 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
-      return callback(null, addBlockList);
     case 'addDomainToAllowlist':
-      const addAllowList = await addDomainToAllowlist(
+      await addDomainToAllowlist(
         payload.data,
         token,
         options,
@@ -222,9 +221,8 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
-      return callback(null, addAllowList);
     case 'removeDomainFromAllowlist':
-      const removeDomainFromAllowList = await removeDomainFromAllowlist(
+      await removeDomainFromAllowlist(
         payload.data,
         token,
         options,
@@ -232,9 +230,8 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
-      return callback(null, removeDomainFromAllowList);
     case 'removeDomainFromBlocklist':
-      const removeDomainFromBlockList = await removeDomainFromBlocklist(
+      await removeDomainFromBlocklist(
         payload.data,
         token,
         options,
@@ -242,7 +239,6 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
-      return callback(null, removeDomainFromBlockList);
     default:
       return callback({ err: 'Invalid action' });
   }
