@@ -22,8 +22,6 @@ const addDomainToBlocklist = async (
     //TODO: Add in who is data from Umbrella to the integration.
 
     //TODO: add remove from blocklist and allow list?
-    options.managementSecretKey;
-
     const globalBlockListId = await getGlobalDestinationListId(
       token,
       'Global Block List',
