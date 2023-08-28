@@ -18,6 +18,9 @@ const {
   fromPairs
 } = require('lodash/fp');
 
+// Number of seconds before the API Key should expire to expire it
+const EXPIRE_THRESHOLD = 120;
+
 const validateOptions = require('./src/validateOptions');
 const getCategorization = require('./src/getCategorization');
 const addBlocklistDataToLookupResults = require('./src/addBlocklistDataToLookupResults');
@@ -151,6 +154,12 @@ async function doLookup(entities, options, cb) {
 }
 
 async function getToken(options, asyncRequestWithDefault, Logger) {
+  if (tokenCache.has(options.apiKey)) {
+    Logger.debug('Using cached token');
+    return tokenCache.get(options.apiKey);
+  }
+
+  Logger.debug('Generating fresh token');
   const response = await asyncRequestWithDefault({
     url: `${options.umbrellaUrl}/auth/v2/token`,
     method: 'POST',
@@ -167,8 +176,12 @@ async function getToken(options, asyncRequestWithDefault, Logger) {
     json: true
   });
 
-  Logger.trace({ response }, 'Response');
-  tokenCache.set('token', response.body, response.body.expires_in - 60);
+  tokenCache.set(
+    options.apiKey,
+    response.body,
+    response.body.expires_in - EXPIRE_THRESHOLD
+  );
+
   return response.body;
 }
 
