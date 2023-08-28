@@ -85,25 +85,25 @@ async function doLookup(entities, options, cb) {
 
   Logger.trace({ entities }, 'doLookup');
 
-  const token = await getToken(options, asyncRequestWithDefault, Logger);
-
-  const eventTypes = splitCommaOption(options.eventTypes);
-  const eventSeverities = splitCommaOption(options.eventSeverities);
-
-  const entityLookup = flow(
-    map((entity) => [flow(get('value'), toLower)(entity), entity]),
-    fromPairs
-  )(entities);
-
-  const queryGroups = getQueryGroups(entities);
-
-  let validStatuses = new Set();
-
-  options.statuses.forEach((status) => {
-    validStatuses.add(+status.value);
-  });
-
   try {
+    const token = await getToken(options, asyncRequestWithDefault, Logger);
+
+    const eventTypes = splitCommaOption(options.eventTypes);
+    const eventSeverities = splitCommaOption(options.eventSeverities);
+
+    const entityLookup = flow(
+      map((entity) => [flow(get('value'), toLower)(entity), entity]),
+      fromPairs
+    )(entities);
+
+    const queryGroups = getQueryGroups(entities);
+
+    let validStatuses = new Set();
+
+    options.statuses.forEach((status) => {
+      validStatuses.add(+status.value);
+    });
+
     await async.each(
       queryGroups,
       getCategorization(
