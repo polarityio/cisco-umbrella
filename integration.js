@@ -212,6 +212,7 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
+      break;
     case 'addDomainToAllowlist':
       await addDomainToAllowlist(
         payload.data,
@@ -221,6 +222,7 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
+      break;
     case 'removeDomainFromAllowlist':
       await removeDomainFromAllowlist(
         payload.data,
@@ -230,6 +232,7 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
+      break;
     case 'removeDomainFromBlocklist':
       await removeDomainFromBlocklist(
         payload.data,
@@ -239,6 +242,7 @@ async function onMessage(payload, options, callback) {
         callback,
         Logger
       );
+      break;
     default:
       return callback({ err: 'Invalid action' });
   }
