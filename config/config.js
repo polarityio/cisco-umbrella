@@ -25,28 +25,13 @@ module.exports = {
   description: 'Provides domain status and categorization',
   entityTypes: ['domain'],
   defaultColor: 'light-pink',
-  /**
-   * An array of style files (css or less) that will be included for your integration. Any styles specified in
-   * the below files can be used in your custom template.
-   *
-   * @type Array
-   * @optional
-   */
-  styles: ['./styles/umbrella.less'],
-  /**
-   * Provide custom component logic and template for rendering the integration details block.  If you do not
-   * provide a custom template and/or component then the integration will display data as a table of key value
-   * pairs.
-   *
-   * @type Object
-   * @optional
-   */
+  styles: ['./client/styles.less'],
   block: {
     component: {
-      file: './components/umbrella-block.js'
+      file: './client/block.js'
     },
     template: {
-      file: './templates/umbrella-block.hbs'
+      file: './client/block.hbs'
     }
   },
   request: {
@@ -78,26 +63,6 @@ module.exports = {
    */
   options: [
     {
-      key: 'umbrellaUrl',
-      name: 'Cisco Umbrella API URL',
-      description:
-        'The URL of the Cisco Umbrella API including the schema (i.e., https://).  Defaults to "https://api.umbrella.com".',
-      default: 'https://api.umbrella.com',
-      type: 'text',
-      userCanEdit: false,
-      adminOnly: true
-    },
-    {
-      key: 'investigateUrl',
-      name: 'Cisco Umbrella Investigate API URL',
-      description:
-        'The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://).  Defaults to "https://investigate.api.umbrella.com".',
-      default: 'https://investigate.api.umbrella.com',
-      type: 'text',
-      userCanEdit: false,
-      adminOnly: true
-    },
-    {
       key: 'apiKey',
       name: 'Cisco Umbrella API Key',
       description: 'Valid Cisco Umbrella API Key',
@@ -116,15 +81,6 @@ module.exports = {
       adminOnly: true
     },
     {
-      key: 'investigateApiKey',
-      name: 'Cisco Umbrella Investigate API key',
-      description: 'Valid Cisco Umbrella Investigate API key',
-      default: '',
-      type: 'password',
-      userCanEdit: false,
-      adminOnly: true
-    },
-    {
       key: 'statuses',
       name: 'Return Statuses',
       description:
@@ -137,32 +93,27 @@ module.exports = {
         {
           value: '1',
           display: 'Benign'
-        },
-        {
-          value: '-1',
-          display: 'Malicious'
         }
       ],
       type: 'select',
       options: [
         {
-          value: '0',
-          display: 'Uncategorized'
+          value: '-1',
+          display: 'Malicious'
         },
         {
           value: '1',
           display: 'Benign'
         },
         {
-          value: '-1',
-          display: 'Malicious'
+          value: '0',
+          display: 'Uncategorized'
         }
       ],
       multiple: true,
       userCanEdit: false,
       adminOnly: true
     },
-
     {
       key: 'getWhoIsData',
       name: 'Get WHOIS Data',

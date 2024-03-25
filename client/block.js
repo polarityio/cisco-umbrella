@@ -1,8 +1,8 @@
 'use strict';
 polarity.export = PolarityComponent.extend({
   details: Ember.computed.alias('block.data.details'),
-  eventTypes: Ember.computed.alias('block.data.details.eventTypes'),
-  eventSeverities: Ember.computed.alias('block.data.details.eventSeverities'),
+  summary: Ember.computed.alias('block.data.summary'),
+
   timezone: Ember.computed('Intl', function () {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
@@ -75,6 +75,7 @@ polarity.export = PolarityComponent.extend({
         .then(({ message, isInBlocklist }) => {
           outerThis.set('details.isInBlocklist', isInBlocklist);
           outerThis.set('removeBlocklistMessage', message);
+          outerThis.set('summary', outerThis.get('summary').concat('In Blocklist'));
         })
         .catch((err) => {
           outerThis.set(
@@ -109,6 +110,10 @@ polarity.export = PolarityComponent.extend({
         .then(({ message }) => {
           outerThis.set('details.isInBlocklist', false);
           outerThis.set('submitBlocklistMessage', message);
+          outerThis.set(
+            'summary',
+            outerThis.get('summary').filter((tag) => tag !== 'In Blocklist')
+          );
         })
         .catch((err) => {
           outerThis.set(
@@ -172,6 +177,7 @@ polarity.export = PolarityComponent.extend({
         .then(({ message, isInAllowlist }) => {
           outerThis.set('details.isInAllowlist', isInAllowlist);
           outerThis.set('removeAllowlistMessage', message);
+          outerThis.set('summary', outerThis.get('summary').concat('In Allowlist'));
         })
         .catch((err) => {
           outerThis.set(
@@ -206,6 +212,10 @@ polarity.export = PolarityComponent.extend({
         .then(({ message }) => {
           outerThis.set('details.isInAllowlist', false);
           outerThis.set('submitAllowlistMessage', message);
+          outerThis.set(
+            'summary',
+            outerThis.get('summary').filter((tag) => tag !== 'In Allowlist')
+          );
         })
         .catch((err) => {
           outerThis.set(

@@ -3,19 +3,15 @@
   "name": "Cisco Umbrella (OpenDNS)",
   "acronym": "UMB",
   "description": "Provides domain status and categorization",
-  "entityTypes": [
-    "domain"
-  ],
+  "entityTypes": ["domain"],
   "defaultColor": "light-pink",
-  "styles": [
-    "./styles/umbrella.less"
-  ],
+  "styles": ["./client/styles.less"],
   "block": {
     "component": {
-      "file": "./components/umbrella-block.js"
+      "file": "./client/block.js"
     },
     "template": {
-      "file": "./templates/umbrella-block.hbs"
+      "file": "./client/block.hbs"
     }
   },
   "request": {
@@ -29,24 +25,6 @@
     "level": "info"
   },
   "options": [
-    {
-      "key": "umbrellaUrl",
-      "name": "Cisco Umbrella API URL",
-      "description": "The URL of the Cisco Umbrella API including the schema (i.e., https://).  Defaults to \"https://api.umbrella.com\".",
-      "default": "https://api.umbrella.com",
-      "type": "text",
-      "userCanEdit": false,
-      "adminOnly": true
-    },
-    {
-      "key": "investigateUrl",
-      "name": "Cisco Umbrella Investigate API URL",
-      "description": "The URL of the Cisco Umbrella Investigate API including the schema (i.e., https://).  Defaults to \"https://investigate.api.umbrella.com\".",
-      "default": "https://investigate.api.umbrella.com",
-      "type": "text",
-      "userCanEdit": false,
-      "adminOnly": true
-    },
     {
       "key": "apiKey",
       "name": "Cisco Umbrella API Key",
@@ -66,15 +44,6 @@
       "adminOnly": true
     },
     {
-      "key": "investigateApiKey",
-      "name": "Cisco Umbrella Investigate API key",
-      "description": "Valid Cisco Umbrella Investigate API key",
-      "default": "",
-      "type": "password",
-      "userCanEdit": false,
-      "adminOnly": true
-    },
-    {
       "key": "statuses",
       "name": "Return Statuses",
       "description": "Select one of more statuses that will be returned when searching.  The default is to all available domains.",
@@ -86,25 +55,21 @@
         {
           "value": "1",
           "display": "Benign"
-        },
-        {
-          "value": "-1",
-          "display": "Malicious"
         }
       ],
       "type": "select",
       "options": [
         {
-          "value": "0",
-          "display": "Uncategorized"
+          "value": "-1",
+          "display": "Malicious"
         },
         {
           "value": "1",
           "display": "Benign"
         },
         {
-          "value": "-1",
-          "display": "Malicious"
+          "value": "0",
+          "display": "Uncategorized"
         }
       ],
       "multiple": true,
