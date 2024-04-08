@@ -1,10 +1,10 @@
-const { flow, get, map } = require('lodash/fp');
+const { flow, get, map, mergeAll } = require('lodash/fp');
 const {
   logging: { getLogger },
   errors: { parseErrorToReadableJson }
 } = require('polarity-integration-utils');
 
-const { requestWithDefaults } = require('../request');
+const { requestsInParallel } = require('../request');
 
 const getCategoryLabelsByIds = require('./getCategoryLabelsByIds');
 
@@ -12,36 +12,37 @@ const getCategorizations = async (entities, options) => {
   const Logger = getLogger();
 
   try {
-    const categoriesByEntityValues = get(
-      'body',
-      await requestWithDefaults({
-        method: 'POST',
-        route: 'investigate/v2/domains/categorization',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: map('value', entities),
+    const categoriesRequests = map(
+      (entity) => ({
+        route: `investigate/v2/domains/categorization/${entity.value}`,
         options
-      })
+      }),
+      entities
+    );
+
+    const categoriesByEntityValues = mergeAll(
+      await requestsInParallel(categoriesRequests, 'body')
     );
 
     const categoryLabelsByIds = await getCategoryLabelsByIds(options);
 
-    const validStatuses = map(flow(get('value'), parseInt), options.statuses)
+    const validStatuses = map(flow(get('value'), parseInt), options.statuses);
+
     const categorizations = map(
       (entity) => ({
         resultId: entity.value,
         result: flow(get(entity.value), (category) =>
-          validStatuses.includes(category.status)
+          validStatuses.includes(get('status', category))
             ? {
-                status: category.status,
-                statusHuman: STATUS_TO_HUMAN_READABLE[category.status] || 'Unknown',
+                status: get('status', category),
+                statusHuman:
+                  STATUS_TO_HUMAN_READABLE[get('status', category)] || 'Unknown',
                 security_categories: getCategoryLabels(
-                  category.security_categories,
+                  get('security_categories', category),
                   categoryLabelsByIds
                 ),
                 content_categories: getCategoryLabels(
-                  category.content_categories,
+                  get('content_categories', category),
                   categoryLabelsByIds
                 )
               }
