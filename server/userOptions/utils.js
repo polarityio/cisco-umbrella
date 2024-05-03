@@ -1,4 +1,4 @@
-const { isEmpty } = require('lodash/fp');
+const { isEmpty, get } = require('lodash/fp');
 const reduce = require('lodash/fp/reduce').convert({ cap: false });
 
 const validateStringOptions = (stringOptionsErrorMessages, options, otherErrors = []) =>

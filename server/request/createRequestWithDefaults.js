@@ -1,15 +1,14 @@
 const fs = require('fs');
 
 const request = require('postman-request');
-const { get, isEmpty, getOr, omit, flow, getOr, parseInt, min } = require('lodash/fp');
+const { get, isEmpty, getOr, omit, flow, parseInt } = require('lodash/fp');
 const Bottleneck = require('bottleneck');
 
 const { logging, errors } = require('polarity-integration-utils');
 
 const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
 
-const NodeCache = require('node-cache');
-const limiterCache = new NodeCache();
+const limiterCache = new Map();
 
 const setLimiterFromResponseHeaders = (route, headers) => {
   const limiterFromCache = limiterCache.get(route);
@@ -72,7 +71,7 @@ const createRequestWithDefaults = ({
   return requestDefaultsWithInterceptors;
 };
 
-export const requestWithDefaultsBuilder = (
+const requestWithDefaultsBuilder = (
   defaultsProxyOptions,
   roundedSuccessStatusCodes,
   useLimiter,
@@ -113,7 +112,7 @@ export const requestWithDefaultsBuilder = (
         requestOptionsToOmitFromLogsKeyPaths
       );
 
-      setLimiterFromResponseHeaders(requestOptions.route, result.headers);
+      if (!limiter) setLimiterFromResponseHeaders(requestOptions.route, result.headers);
 
       postRequestFunctionResults = await postprocessRequestResponse(
         result,

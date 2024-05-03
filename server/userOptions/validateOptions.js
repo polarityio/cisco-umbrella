@@ -1,5 +1,5 @@
 const { getGlobalDestinationListId } = require('../queries');
-const { validateStringOptions } = require('./utils');
+const { validateStringOptions, flattenOptions } = require('./utils');
 
 const validateOptions = async (options, callback) => {
   const stringOptionsErrorMessages = {
@@ -22,46 +22,50 @@ const validateOptions = async (options, callback) => {
         }
       : [];
 
-  const destinationNameErrors = await getDestinationNameErrors(options);
+  const destinationNameErrors = !stringValidationErrors.length
+    ? await getDestinationNameErrors(options)
+    : [];
 
   const errors = []
     .concat(stringValidationErrors)
     .concat(noStatusesSelectedError)
     .concat(destinationNameErrors);
-    
+
   callback(null, errors);
 };
 
 const getDestinationNameErrors = async (options) => {
   const flattenedOptions = flattenOptions(options);
 
-  let blocklistDestinationNameError, allowlistDestinationNameError;
+  let blocklistDestinationNameError = [], allowlistDestinationNameError = [];
 
   const blockListDestinationId = await getGlobalDestinationListId(
     flattenedOptions.blocklistDestinationName,
     flattenedOptions
-  ).catch(() => {});
+  )
 
   if (!blockListDestinationId) {
-    blocklistDestinationNameError = {
+    blocklistDestinationNameError = [{
       key: 'blocklistDestinationName',
       message:
         '* Blocklist Destination Name not found. Please check the name and try again.'
-    };
+    }];
   }
 
   const allowListDestinationId = await getGlobalDestinationListId(
     flattenedOptions.allowlistDestinationName,
     flattenedOptions
-  ).catch(() => {});
+  )
 
   if (!allowListDestinationId) {
-    allowlistDestinationNameError = {
+    allowlistDestinationNameError = [{
       key: 'allowlistDestinationName',
       message:
         '* Allowlist Destination Name not found. Please check the name and try again.'
-    };
+    }];
   }
+
+  return blocklistDestinationNameError.concat(allowlistDestinationNameError);
 };
 
 module.exports = validateOptions;

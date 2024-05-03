@@ -2,7 +2,7 @@ const { map, get, getOr, filter, flow, negate, isEmpty } = require('lodash/fp');
 const { parallelLimit } = require('async');
 
 const createRequestWithDefaults = require('./createRequestWithDefaults');
-const config = require('../config/config');
+const config = require('../../config/config');
 
 const NodeCache = require('node-cache');
 const tokenCache = new NodeCache();
@@ -62,6 +62,7 @@ const getToken = async (options) => {
     'body',
     await requestForAuth({
       url: 'https://api.umbrella.com/auth/v2/token',
+      route: 'auth/v2/token',
       auth: {
         user: options.apiKey,
         pass: options.secretKey
