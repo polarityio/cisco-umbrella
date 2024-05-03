@@ -11,17 +11,18 @@ const getBlockListDestinations = async (entities, options) => {
 
   try {
     const blockList = await getDestinationList('Global Block List', options);
-      const blockListDestinations = map((entity) => {
-        const allowListDestination = find(
-          flow(get('destination'), toLower, eq(flow(get('value'), toLower)(entity))),
-          blockList
-        );
+    
+    const blockListDestinations = map((entity) => {
+      const allowListDestination = find(
+        flow(get('destination'), toLower, eq(flow(get('value'), toLower)(entity))),
+        blockList
+      );
 
-        return {
-          resultId: entity.value,
-          result: allowListDestination
-        };
-      }, entities);
+      return {
+        resultId: entity.value,
+        result: allowListDestination
+      };
+    }, entities);
 
     Logger.trace(
       {
