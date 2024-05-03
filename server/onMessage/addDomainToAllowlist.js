@@ -13,7 +13,7 @@ const addDomainToAllowlist = async ({ domain, comment }, options, callback) => {
 
   try {
     const globalAllowListId = await getGlobalDestinationListId(
-      'Global Allow List',
+      options.allowlistDestinationName,
       options
     );
 

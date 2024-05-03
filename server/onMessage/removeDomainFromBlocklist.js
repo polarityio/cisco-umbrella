@@ -11,7 +11,7 @@ const removeDomainFromBlocklist = async ({ isInBlocklist }, options, callback) =
 
   try {
     const globalBlockListId = await getGlobalDestinationListId(
-      'Global Block List',
+      options.blocklistDestinationName,
       options
     );
 

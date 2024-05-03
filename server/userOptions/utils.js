@@ -14,6 +14,14 @@ const validateStringOptions = (stringOptionsErrorMessages, options, otherErrors 
       : agg;
   }, otherErrors)(stringOptionsErrorMessages);
 
+const flattenOptions = (options) =>
+  reduce(
+    (agg, optionObj, optionKey) => ({ ...agg, [optionKey]: get('value', optionObj) }),
+    {},
+    options
+  );
+
 module.exports = {
-  validateStringOptions
+  validateStringOptions,
+  flattenOptions
 };

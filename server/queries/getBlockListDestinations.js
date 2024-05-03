@@ -10,7 +10,7 @@ const getBlockListDestinations = async (entities, options) => {
   const Logger = getLogger();
 
   try {
-    const blockList = await getDestinationList('Global Block List', options);
+    const blockList = await getDestinationList(options.blocklistDestinationName, options);
     
     const blockListDestinations = map((entity) => {
       const allowListDestination = find(
