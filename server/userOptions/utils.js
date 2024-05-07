@@ -1,4 +1,4 @@
-const { isEmpty } = require('lodash/fp');
+const { isEmpty, get } = require('lodash/fp');
 const reduce = require('lodash/fp/reduce').convert({ cap: false });
 
 const validateStringOptions = (stringOptionsErrorMessages, options, otherErrors = []) =>
@@ -14,6 +14,14 @@ const validateStringOptions = (stringOptionsErrorMessages, options, otherErrors 
       : agg;
   }, otherErrors)(stringOptionsErrorMessages);
 
+const flattenOptions = (options) =>
+  reduce(
+    (agg, optionObj, optionKey) => ({ ...agg, [optionKey]: get('value', optionObj) }),
+    {},
+    options
+  );
+
 module.exports = {
-  validateStringOptions
+  validateStringOptions,
+  flattenOptions
 };

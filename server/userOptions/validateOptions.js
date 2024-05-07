@@ -1,9 +1,12 @@
-const { validateStringOptions } = require('./utils');
+const { getGlobalDestinationListId } = require('../queries');
+const { validateStringOptions, flattenOptions } = require('./utils');
 
 const validateOptions = async (options, callback) => {
   const stringOptionsErrorMessages = {
-    apiKey: 'You must provide a valid API Key from your Cisco Umbrella Account',
-    secretKey: 'You must provide a valid Secret Key from your Cisco Umbrella Account'
+    apiKey: '* Required',
+    secretKey: '* Required',
+    blocklistDestinationName: '* Required',
+    allowlistDestinationName: '* Required'
   };
 
   const stringValidationErrors = validateStringOptions(
@@ -11,7 +14,58 @@ const validateOptions = async (options, callback) => {
     options
   );
 
-  callback(null, stringValidationErrors);
+  const noStatusesSelectedError =
+    options.statuses.value.length === 0
+      ? {
+          key: 'statuses',
+          message: '* At least one Return Status must be selected'
+        }
+      : [];
+
+  const destinationNameErrors = !stringValidationErrors.length
+    ? await getDestinationNameErrors(options)
+    : [];
+
+  const errors = []
+    .concat(stringValidationErrors)
+    .concat(noStatusesSelectedError)
+    .concat(destinationNameErrors);
+
+  callback(null, errors);
+};
+
+const getDestinationNameErrors = async (options) => {
+  const flattenedOptions = flattenOptions(options);
+
+  let blocklistDestinationNameError = [], allowlistDestinationNameError = [];
+
+  const blockListDestinationId = await getGlobalDestinationListId(
+    flattenedOptions.blocklistDestinationName,
+    flattenedOptions
+  )
+
+  if (!blockListDestinationId) {
+    blocklistDestinationNameError = [{
+      key: 'blocklistDestinationName',
+      message:
+        '* Blocklist Destination Name not found. Please check the name and try again.'
+    }];
+  }
+
+  const allowListDestinationId = await getGlobalDestinationListId(
+    flattenedOptions.allowlistDestinationName,
+    flattenedOptions
+  )
+
+  if (!allowListDestinationId) {
+    allowlistDestinationNameError = [{
+      key: 'allowlistDestinationName',
+      message:
+        '* Allowlist Destination Name not found. Please check the name and try again.'
+    }];
+  }
+
+  return blocklistDestinationNameError.concat(allowlistDestinationNameError);
 };
 
 module.exports = validateOptions;

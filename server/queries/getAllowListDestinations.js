@@ -10,7 +10,7 @@ const getAllowListDestinations = async (entities, options) => {
   const Logger = getLogger();
 
   try {
-    const allowList = await getDestinationList('Global Allow List', options);
+    const allowList = await getDestinationList(options.allowlistDestinationName, options);
 
     const allowListDestinations = map((entity) => {
       const allowListDestination = find(

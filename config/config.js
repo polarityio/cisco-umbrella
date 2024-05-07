@@ -115,6 +115,26 @@ module.exports = {
       adminOnly: true
     },
     {
+      key: 'blocklistDestinationName',
+      name: 'Blocklist Destination Name',
+      description:
+        'The Destination List name for the Blocklist that will be used to both Search and Submit domains. Can be found under Policies -> Policy Components -> Destination Lists. Must be set to "Users can view only".',
+      default: 'Global Block List',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: false
+    },
+    {
+      key: 'allowlistDestinationName',
+      name: 'Allowlist Destination Name',
+      description:
+        'The Destination List name for the Allowlist that will be used to both Search and Submit domains. Can be found under Policies -> Policy Components -> Destination Lists. Must be set to "Users can view only".',
+      default: 'Global Allow List',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: false
+    },
+    {
       key: 'getWhoIsData',
       name: 'Get WHOIS Data',
       description:

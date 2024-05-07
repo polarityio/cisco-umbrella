@@ -20,6 +20,12 @@ Select one of more statuses that will be returned. The default is to only return
 
 Valid values are: `Malicious`, `Benign`, and `Uncategorized`
 
+### Blocklist Destination Name
+The Destination List name for the Blocklist that will be used to both Search and Submit domains. Can be found under Policies -> Policy Components -> Destination Lists. Must be set to \"Users can view only\".
+
+### Allowlist Destination Name
+The Destination List name for the Allowlist that will be used to both Search and Submit domains. Can be found under Policies -> Policy Components -> Destination Lists. Must be set to \"Users can view only\".
+
 ### Get WHOIS Data
 
 If checked, each domain will get the WHOIS information for domains that have your selected Return Statuses.

@@ -12,7 +12,7 @@ const addDomainToBlocklist = async ({ domain, comment }, options, callback) => {
 
   try {
     const globalBlockListId = await getGlobalDestinationListId(
-      'Global Block List',
+      options.blocklistDestinationName,
       options
     );
 

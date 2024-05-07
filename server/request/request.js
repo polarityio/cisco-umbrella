@@ -1,10 +1,8 @@
 const { map, get, getOr, filter, flow, negate, isEmpty } = require('lodash/fp');
 const { parallelLimit } = require('async');
 
-const {
-  requests: { createRequestWithDefaults }
-} = require('polarity-integration-utils');
-const config = require('../config/config');
+const createRequestWithDefaults = require('./createRequestWithDefaults');
+const config = require('../../config/config');
 
 const NodeCache = require('node-cache');
 const tokenCache = new NodeCache();
@@ -38,7 +36,10 @@ const requestWithDefaults = createRequestWithDefaults({
     json: true
   }),
   postprocessRequestFailure: (error) => {
-    if (error.status === 404 && JSON.parse(error.requestOptions).route.includes('whois')){
+    if (
+      error.status === 404 &&
+      JSON.parse(error.requestOptions).route.includes('whois')
+    ) {
       return;
     }
     const errorResponseBody = JSON.parse(error.description);
@@ -61,6 +62,7 @@ const getToken = async (options) => {
     'body',
     await requestForAuth({
       url: 'https://api.umbrella.com/auth/v2/token',
+      route: 'auth/v2/token',
       auth: {
         user: options.apiKey,
         pass: options.secretKey
