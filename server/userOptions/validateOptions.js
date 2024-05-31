@@ -48,7 +48,7 @@ const getDestinationNameErrors = async (options) => {
     blocklistDestinationNameError = [{
       key: 'blocklistDestinationName',
       message:
-        '* Blocklist Destination Name not found. Please check the name and try again.'
+        '* Blocklist Destination Name not found. Please confirm the Name and spelling is in Umbrella under the Side Nav -> Policies -> Policy Components -> Destination Lists. If not, please create it and try again.'
     }];
   }
 
@@ -58,11 +58,13 @@ const getDestinationNameErrors = async (options) => {
   )
 
   if (!allowListDestinationId) {
-    allowlistDestinationNameError = [{
-      key: 'allowlistDestinationName',
-      message:
-        '* Allowlist Destination Name not found. Please check the name and try again.'
-    }];
+    allowlistDestinationNameError = [
+      {
+        key: 'allowlistDestinationName',
+        message:
+          '* Allowlist Destination Name not found. Please confirm the Name and spelling is in Umbrella under the Side Nav -> Policies -> Policy Components -> Destination Lists. If not, please create it and try again.'
+      }
+    ];
   }
 
   return blocklistDestinationNameError.concat(allowlistDestinationNameError);
