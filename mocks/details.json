@@ -1,0 +1,43 @@
+{
+  "categorization": {
+    "status": -1,
+    "statusHuman": "Malicious",
+    "security_categories": [
+      "Malware",
+      "Phishing",
+      "Command and Control"
+    ],
+    "content_categories": [
+      "Suspicious"
+    ]
+  },
+  "whois": {
+    "registrarName": "NameCheap, Inc.",
+    "expires": "2025-08-15T00:00:00.000Z",
+    "nameServers": [
+      "ns1.example.com",
+      "ns2.example.com"
+    ],
+    "created": "2018-08-15T00:00:00.000Z",
+    "updated": "2024-07-10T00:00:00.000Z",
+    "registrantOrganization": "Privacy Protected",
+    "registrantCountry": "US",
+    "registrantEmail": "abuse@registrar.example",
+    "administrativeContactEmail": "admin@example.com",
+    "technicalContactEmail": "tech@example.com",
+    "domainStatus": [
+      "clientTransferProhibited"
+    ]
+  },
+  "isInAllowlist": false,
+  "isInBlocklist": true,
+  "internalMetadata": {
+    "queryTimestamp": "2024-01-16T02:25:00.000Z",
+    "apiVersion": "v2",
+    "responseTime": 145
+  },
+  "debugInfo": {
+    "cacheHit": false,
+    "processingTimeMs": 42
+  }
+}

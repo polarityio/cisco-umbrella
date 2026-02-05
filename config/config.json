@@ -3,9 +3,13 @@
   "name": "Cisco Umbrella (OpenDNS)",
   "acronym": "UMB",
   "description": "Provides domain status and categorization",
-  "entityTypes": ["domain"],
+  "entityTypes": [
+    "domain"
+  ],
   "defaultColor": "light-pink",
-  "styles": ["./client/styles.less"],
+  "styles": [
+    "./client/styles.less"
+  ],
   "block": {
     "component": {
       "file": "./client/block.js"
@@ -121,5 +125,10 @@
       "userCanEdit": false,
       "adminOnly": false
     }
-  ]
+  ],
+  "reducer": {
+    "details": {
+      "file": "./reducers/details.json"
+    }
+  }
 }

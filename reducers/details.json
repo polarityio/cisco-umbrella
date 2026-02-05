@@ -1,0 +1,51 @@
+{
+  "root": {
+    "path": "",
+    "on_null": "return_empty"
+  },
+  "pipeline": [
+    {
+      "op": "copy",
+      "from": "categorization.statusHuman",
+      "to": "reduced_results.status_human"
+    },
+    {
+      "op": "copy",
+      "from": "isInBlocklist",
+      "to": "reduced_results.is_in_blocklist"
+    },
+    {
+      "op": "copy",
+      "from": "categorization.security_categories",
+      "to": "reduced_results.security_categories"
+    },
+    {
+      "op": "copy",
+      "from": "whois.registrarName",
+      "to": "reduced_results.whois_registrar_name"
+    },
+    {
+      "op": "copy",
+      "from": "whois",
+      "to": "reduced_results.whois"
+    },
+    {
+      "op": "copy",
+      "from": "whois.expires",
+      "to": "reduced_results.whois_expires"
+    },
+    {
+      "op": "copy",
+      "from": "whois.nameServers",
+      "to": "reduced_results.whois_name_servers"
+    },
+    {
+      "op": "prune",
+      "strategy": "empty_values",
+      "target": "reduced_results"
+    }
+  ],
+  "output": {
+    "result": "$working.reduced_results"
+  }
+}
